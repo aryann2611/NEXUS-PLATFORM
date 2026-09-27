@@ -18,11 +18,13 @@ MySQL
 
 **Backend:** Node.js, Fastify (JSON Schema validation), TypeScript, MySQL (`mysql2`), @fastify/cors, dotenv
 
+**Load testing:** [k6](https://k6.io) (optional — only the Load Tests page needs it)
+
 **Tests:** Node's built-in test runner (`node:test`) via `tsx`, running against a real MySQL database
 
 ## Local Setup
 
-Requires Node.js 22+ and a running MySQL 8 server.
+Requires Node.js 22+ and a running MySQL 8 server. The Load Tests page also needs [k6](https://k6.io/docs/get-started/installation/) on your PATH.
 
 ```bash
 git clone <repo-url>
@@ -64,6 +66,7 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 | `POST` | `/api/projects` | Register an API → `201` |
 | `GET` | `/api/reports?range=24h\|7d\|30d&projectId=` | Uptime, latency percentiles, incidents and time buckets (default `7d`, all APIs) |
 | `GET` | `/api/activity?limit=20&changes=true&projectId=` | Recent checks, newest first, labelled `Health check` / `Went down` / `Slow response` / `Recovered`; `changes=true` keeps only status changes (last 7 days, `limit` up to 200) |
+| `POST` | `/api/load-tests` | Run a k6 load test; streams live NDJSON metric snapshots |
 
 `POST /api/projects` body:
 
@@ -104,6 +107,6 @@ The Dashboard, Monitoring page and API cards show these results live. The Report
 | Backend connection status (sidebar, dashboard, settings) | Real — checked on load and every 30s |
 | Health checks, uptime, latency, incidents, activity | Real — measured by the monitoring engine; shown on the Dashboard, APIs, Monitoring and Reports pages |
 | Endpoint counts per API | Not measured yet — shown as `—` |
-| Load Tests | UI foundation only (k6 runner in progress in a separate pull request) |
+| Load Tests | Real — runs k6 against a target URL and streams live results (requests, req/s, avg, p95, p99, error rate). Capped at 50 virtual users / 60s. |
 
-Next up: load testing (k6), alerts and authentication.
+Next up: alerts and authentication.
