@@ -8,12 +8,14 @@ import { Field, Input, Select, Switch, Textarea } from "../common/Form";
 interface AddApiDrawerProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (input: NewApiInput) => void;
+  onSubmit: (input: NewApiInput) => Promise<void>;
 }
 
 export default function AddApiDrawer({ open, onClose, onSubmit }: AddApiDrawerProps) {
   const [tags, setTags] = useState<string[]>([]);
   const [tagDraft, setTagDraft] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   function addTag() {
     const tag = tagDraft.trim().toLowerCase();
@@ -28,31 +30,45 @@ export default function AddApiDrawer({ open, onClose, onSubmit }: AddApiDrawerPr
     }
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    onSubmit({
-      name: String(form.get("name")).trim(),
-      baseUrl: String(form.get("baseUrl")).trim(),
-      description: String(form.get("description")).trim(),
-      tags,
-      checkIntervalSeconds: Number(form.get("checkInterval")),
-      timeoutSeconds: Number(form.get("timeout")),
-      uptimeMonitoring: form.has("uptimeMonitoring"),
-      performanceMonitoring: form.has("performanceMonitoring"),
-      errorTracking: form.has("errorTracking"),
-    });
-    e.currentTarget.reset();
+    const formElement = e.currentTarget;
+    const form = new FormData(formElement);
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      await onSubmit({
+        name: String(form.get("name")).trim(),
+        baseUrl: String(form.get("baseUrl")).trim(),
+        description: String(form.get("description")).trim(),
+        tags,
+        checkIntervalSeconds: Number(form.get("checkInterval")),
+        timeoutSeconds: Number(form.get("timeout")),
+        uptimeMonitoring: form.has("uptimeMonitoring"),
+        performanceMonitoring: form.has("performanceMonitoring"),
+        errorTracking: form.has("errorTracking"),
+      });
+      formElement.reset();
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Couldn't add the API.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function handleClose() {
+    setSubmitError("");
+    onClose();
   }
 
   function handleReset() {
     setTags([]);
     setTagDraft("");
-    onClose();
+    handleClose();
   }
 
   return (
-    <Drawer open={open} onClose={onClose} title="Add New API" description="Enter the details of the API you want to monitor.">
+    <Drawer open={open} onClose={handleClose} title="Add New API" description="Enter the details of the API you want to monitor.">
       <form onSubmit={handleSubmit} onReset={handleReset} className="flex min-h-0 flex-1 flex-col">
         <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain p-6">
           <Field label="API Name" htmlFor="api-name" hint="A short name to identify this API." required>
@@ -114,10 +130,17 @@ export default function AddApiDrawer({ open, onClose, onSubmit }: AddApiDrawerPr
         </div>
 
         <footer className="grid grid-cols-2 gap-3 border-t border-line p-6">
+          {submitError && (
+            <p role="alert" className="col-span-2 text-sm text-red-400">
+              {submitError}
+            </p>
+          )}
           <Button type="reset" variant="secondary">
             Cancel
           </Button>
-          <Button type="submit">Add API</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Adding…" : "Add API"}
+          </Button>
         </footer>
       </form>
     </Drawer>

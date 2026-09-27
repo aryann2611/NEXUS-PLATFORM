@@ -1,20 +1,15 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { useApis } from "../../hooks/useApis";
 import { useHealth, type HealthState } from "../../hooks/useHealth";
-import type { MonitoredApi, NewApiInput } from "../../types/api";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
 export interface LayoutContext {
   health: HealthState;
-  apis: MonitoredApi[];
-  addApi: (input: NewApiInput) => void;
 }
 
 export default function AppLayout() {
   const health = useHealth();
-  const { apis, addApi } = useApis();
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -29,7 +24,7 @@ export default function AppLayout() {
           key={pathname}
           className="mx-auto max-w-7xl bg-[radial-gradient(80%_40%_at_100%_0%,rgb(255_255_255/0.025),transparent)] px-4 py-6 motion-safe:animate-fade-in sm:px-6 lg:px-8 lg:py-8"
         >
-          <Outlet context={{ health, apis, addApi } satisfies LayoutContext} />
+          <Outlet context={{ health } satisfies LayoutContext} />
         </main>
       </div>
     </div>

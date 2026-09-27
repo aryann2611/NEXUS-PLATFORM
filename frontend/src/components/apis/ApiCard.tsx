@@ -31,7 +31,7 @@ export default function ApiCard({ api }: { api: MonitoredApi }) {
 
       <div className="mt-5 flex items-end justify-between gap-4">
         <div className="flex divide-x divide-line">
-          <Metric label="Endpoints" value={String(api.endpointCount)} />
+          <Metric label="Endpoints" value={api.endpointCount === null ? "—" : String(api.endpointCount)} />
           <Metric label="Uptime" value={api.uptimePercent === null ? "—" : `${api.uptimePercent}%`} />
           <Metric label="Avg Latency" value={api.avgLatencyMs === null ? "—" : `${api.avgLatencyMs}ms`} />
         </div>

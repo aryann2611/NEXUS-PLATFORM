@@ -2,19 +2,33 @@ export type Health = "healthy" | "degraded" | "down" | "pending";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
+/** A registered API as returned by GET /api/projects. */
+export interface Project {
+  id: string;
+  name: string;
+  baseUrl: string;
+  description: string | null;
+  tags: string[];
+  status: Health;
+  checkInterval: number;
+  timeout: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MonitoredApi {
   id: string;
   name: string;
   baseUrl: string;
   health: Health;
-  endpointCount: number;
+  endpointCount: number | null;
   uptimePercent: number | null;
   avgLatencyMs: number | null;
   lastCheckedAt: string | null;
   latencyTrend: number[];
 }
 
-/** Payload for the future API-registration endpoint (e.g. POST /api/projects). */
+/** Values collected by the Add API drawer; sent to POST /api/projects. */
 export interface NewApiInput {
   name: string;
   baseUrl: string;
