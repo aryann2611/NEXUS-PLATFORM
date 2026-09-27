@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-canvas: #050505;
+  --color-surface: #080808;
+  --color-surface-2: #0c0c0c;
+  --color-surface-3: #101010;
+  --color-line: #1c1c1c;
+  --color-line-strong: #2a2a2a;
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-neutral-100 antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(255 255 255 / 0.4);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgb(255 255 255 / 0.2);
+  }
+}
+
+@layer components {
+  /* Native <dialog> slide-in; allow-discrete keeps the exit animation running before display:none. */
+  .drawer {
+    translate: 100% 0;
+    transition:
+      translate 0.25s ease-out,
+      display 0.25s allow-discrete,
+      overlay 0.25s allow-discrete;
+  }
+
+  .drawer[open] {
+    translate: 0 0;
+  }
+
+  .drawer::backdrop {
+    background: rgb(0 0 0 / 0);
+    transition:
+      background-color 0.25s,
+      display 0.25s allow-discrete,
+      overlay 0.25s allow-discrete;
+  }
+
+  .drawer[open]::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  @starting-style {
+    .drawer[open] {
+      translate: 100% 0;
+    }
+
+    .drawer[open]::backdrop {
+      background: rgb(0 0 0 / 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drawer,
+    .drawer::backdrop {
+      transition: none;
+    }
+  }
+}
