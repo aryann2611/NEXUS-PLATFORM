@@ -1,25 +1,57 @@
-import { useState } from "react";
-import { mockApis } from "../mock/apis";
-import type { MonitoredApi, NewApiInput } from "../types/api";
+import { useEffect, useState } from "react";
+import { createProject, getProjects } from "../services/api";
+import type { MonitoredApi, NewApiInput, Project } from "../types/api";
 
-// ponytail: in-memory registry (lost on refresh); swap for GET/POST calls in services/api.ts when the backend endpoint exists.
+export type LoadState = "loading" | "ready" | "error";
+
+// The registry comes from MySQL; metrics stay empty until the monitoring engine measures them.
+function toMonitoredApi(project: Project): MonitoredApi {
+  return {
+    id: project.id,
+    name: project.name,
+    baseUrl: project.baseUrl,
+    health: project.status,
+    endpointCount: null,
+    uptimePercent: null,
+    avgLatencyMs: null,
+    lastCheckedAt: null,
+    latencyTrend: [],
+  };
+}
+
 export function useApis() {
-  const [apis, setApis] = useState<MonitoredApi[]>(mockApis);
+  const [apis, setApis] = useState<MonitoredApi[]>([]);
+  const [state, setState] = useState<LoadState>("loading");
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
 
-  function addApi(input: NewApiInput) {
-    const api: MonitoredApi = {
-      id: crypto.randomUUID(),
-      name: input.name,
-      baseUrl: input.baseUrl,
-      health: "pending",
-      endpointCount: 0,
-      uptimePercent: null,
-      avgLatencyMs: null,
-      lastCheckedAt: null,
-      latencyTrend: [],
+  useEffect(() => {
+    let active = true;
+    getProjects()
+      .then((projects) => {
+        if (!active) return;
+        setApis(projects.map(toMonitoredApi));
+        setState("ready");
+      })
+      .catch((e: unknown) => {
+        if (!active) return;
+        setError(e instanceof Error ? e.message : "Couldn't load APIs.");
+        setState("error");
+      });
+    return () => {
+      active = false;
     };
-    setApis((current) => [api, ...current]);
+  }, [attempt]);
+
+  function reload() {
+    setState("loading");
+    setAttempt((n) => n + 1);
   }
 
-  return { apis, addApi };
+  async function addApi(input: NewApiInput) {
+    const project = await createProject(input);
+    setApis((current) => [toMonitoredApi(project), ...current]);
+  }
+
+  return { apis, state, error, reload, addApi };
 }
