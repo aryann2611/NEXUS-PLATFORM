@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import { env } from "./config/env.js";
 import { isDatabaseUnavailable, pool } from "./db/database.js";
 import { healthRoutes } from "./routes/health.routes.js";
+import { loadTestsRoutes } from "./routes/loadTests.routes.js";
 import { projectsRoutes } from "./routes/projects.routes.js";
 import { isHttpUrl } from "./schemas/projects.schema.js";
 
@@ -38,6 +39,7 @@ export async function buildApp({ logger = true } = {}) {
   await app.register(cors, { origin: env.frontendUrl });
   await app.register(healthRoutes);
   await app.register(projectsRoutes);
+  await app.register(loadTestsRoutes);
 
   return app;
 }
