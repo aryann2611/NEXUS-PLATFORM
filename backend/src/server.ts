@@ -1,20 +1,7 @@
-import Fastify, { type FastifyError } from "fastify";
-import cors from "@fastify/cors";
+import { buildApp } from "./app.js";
 import { env } from "./config/env.js";
-import { healthRoutes } from "./routes/health.routes.js";
 
-const app = Fastify({ logger: true });
-
-await app.register(cors, { origin: env.frontendUrl });
-await app.register(healthRoutes);
-
-app.setErrorHandler((error: FastifyError, _request, reply) => {
-  app.log.error(error);
-  reply.status(error.statusCode ?? 500).send({
-    status: "error",
-    message: error.message || "Internal server error",
-  });
-});
+const app = await buildApp();
 
 try {
   await app.listen({ port: env.port });
