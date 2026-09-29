@@ -2,6 +2,7 @@ import Fastify, { type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import { env } from "./config/env.js";
 import { isDatabaseUnavailable, pool } from "./db/database.js";
+import { activityRoutes } from "./routes/activity.routes.js";
 import { healthRoutes } from "./routes/health.routes.js";
 import { startMonitoring } from "./monitoring/worker.js";
 import { projectsRoutes } from "./routes/projects.routes.js";
@@ -50,6 +51,7 @@ export async function buildApp({ logger = true, monitoring = false } = {}) {
   await app.register(healthRoutes);
   await app.register(projectsRoutes);
   await app.register(reportsRoutes);
+  await app.register(activityRoutes);
 
   return app;
 }

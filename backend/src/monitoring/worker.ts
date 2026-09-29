@@ -8,6 +8,12 @@ const TICK_MS = 5_000;
 const BATCH_SIZE = 20;
 const RETENTION_SWEEP_MS = 60 * 60 * 1000;
 
+/** What /api/health reports about the engine. */
+export const monitoringState = {
+  running: false,
+  lastRunAt: null as Date | null,
+};
+
 interface Logger {
   info(message: string): void;
   error(error: unknown, message?: string): void;
@@ -50,6 +56,7 @@ export function startMonitoring(log: Logger) {
       }
       // Drain the backlog in batches; the next tick picks up anything that becomes due later.
       while (!stopped && (await runDueChecks()) === BATCH_SIZE);
+      monitoringState.lastRunAt = new Date();
     } catch (error) {
       log.error(error, "Monitoring tick failed");
     }
@@ -63,10 +70,12 @@ export function startMonitoring(log: Logger) {
   }
 
   current = tick().finally(schedule);
+  monitoringState.running = true;
   log.info("Monitoring engine started");
 
   return async function stop() {
     stopped = true;
+    monitoringState.running = false;
     clearTimeout(timer);
     await current;
   };

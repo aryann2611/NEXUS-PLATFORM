@@ -58,11 +58,12 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| `GET` | `/api/health` | `{ status, service, timestamp }`; `503` when the database is unreachable |
+| `GET` | `/api/health` | `{ status, service, timestamp, monitoring: { running, lastRunAt } }`; `503` when the database is unreachable |
 | `GET` | `/api/projects` | All registered APIs, newest first |
 | `GET` | `/api/projects/:id` | One API, or `404` |
 | `POST` | `/api/projects` | Register an API → `201` |
 | `GET` | `/api/reports?range=24h\|7d\|30d&projectId=` | Uptime, latency percentiles, incidents and time buckets (default `7d`, all APIs) |
+| `GET` | `/api/activity?limit=20&changes=true&projectId=` | Recent checks, newest first, labelled `Health check` / `Went down` / `Slow response` / `Recovered`; `changes=true` keeps only status changes (last 7 days, `limit` up to 200) |
 
 `POST /api/projects` body:
 
@@ -93,7 +94,7 @@ Uptime is the share of checks that weren't `down`. An incident is a run of conse
 
 Because the engine fetches user-supplied URLs, it refuses loopback, private, link-local (cloud metadata) and other internal addresses, checked on the address actually connected to. Set `MONITOR_ALLOW_PRIVATE_TARGETS=true` to monitor APIs running on your own machine or network. Set `MONITORING_ENABLED=false` to run the API without the engine.
 
-The Reports page shows the results for the last 24 hours, 7 days or 30 days, for all APIs or one: summary figures, response-time and availability trends, per-API latency percentiles, per-API uptime history and an incident log, with CSV and JSON export.
+The Dashboard, Monitoring page and API cards show these results live. The Reports page shows the results for the last 24 hours, 7 days or 30 days, for all APIs or one: summary figures, response-time and availability trends, per-API latency percentiles, per-API uptime history and an incident log, with CSV and JSON export.
 
 ## Current Status
 
@@ -101,9 +102,8 @@ The Reports page shows the results for the last 24 hours, 7 days or 30 days, for
 | --- | --- |
 | API registry (APIs page, Add API drawer) | Real — stored in MySQL |
 | Backend connection status (sidebar, dashboard, settings) | Real — checked on load and every 30s |
-| Health checks, uptime, latency, incidents | Real — measured by the monitoring engine, shown on the APIs and Reports pages |
+| Health checks, uptime, latency, incidents, activity | Real — measured by the monitoring engine; shown on the Dashboard, APIs, Monitoring and Reports pages |
 | Endpoint counts per API | Not measured yet — shown as `—` |
-| Dashboard metrics, Monitoring page, Recent Activity | Sample data from `frontend/src/mock/`, labelled "Sample data" |
-| Load Tests | UI foundation only |
+| Load Tests | UI foundation only (k6 runner in progress in a separate pull request) |
 
-Next up: replace the Dashboard and Monitoring sample data with monitoring results, then load testing (k6), authentication and alerts.
+Next up: load testing (k6), alerts and authentication.

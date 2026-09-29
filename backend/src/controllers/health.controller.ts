@@ -1,4 +1,5 @@
 import { pool } from "../db/database.js";
+import { monitoringState } from "../monitoring/worker.js";
 import type { HealthStatus } from "../types/health.js";
 
 /** Reports ok only when the database answers; a failure surfaces as 503 via the error handler. */
@@ -8,5 +9,9 @@ export async function getHealthStatus(): Promise<HealthStatus> {
     status: "ok",
     service: "nexus",
     timestamp: new Date().toISOString(),
+    monitoring: {
+      running: monitoringState.running,
+      lastRunAt: monitoringState.lastRunAt?.toISOString() ?? null,
+    },
   };
 }

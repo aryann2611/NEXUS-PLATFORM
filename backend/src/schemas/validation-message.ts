@@ -14,6 +14,8 @@ const labels: Record<string, string> = {
   timeout: "timeout",
   range: "range",
   projectId: "projectId",
+  limit: "limit",
+  changes: "changes",
 };
 
 /** Turns the first Ajv issue into a readable sentence that still names the offending field. */

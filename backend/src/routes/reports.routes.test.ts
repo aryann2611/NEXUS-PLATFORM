@@ -154,3 +154,40 @@ test("the monitoring engine checks due APIs and feeds the report", async () => {
   assert.equal(report.totals.checks, 1);
   assert.equal(report.apis[0].uptimePercent, 100);
 });
+
+type ActivityBody = { data: { apiName: string; event: string; outcome: string; error: string | null }[] };
+const getActivity = (query: string) => app.inject({ method: "GET", url: `/api/activity${query}` });
+
+test("GET /api/activity lists recent checks newest first and labels status changes", async () => {
+  await seedChecks();
+  const res = await getActivity("?limit=3");
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(
+    res.json<ActivityBody>().data.map((item) => [item.event, item.outcome]),
+    [["Slow response", "degraded"], ["Recovered", "healthy"], ["Health check", "down"]],
+  );
+});
+
+test("GET /api/activity?changes=true keeps only status changes", async () => {
+  await seedChecks();
+  const { data } = (await getActivity("?changes=true")).json<ActivityBody>();
+  assert.deepEqual(data.map((item) => item.event), ["Slow response", "Recovered", "Went down"]);
+  assert.equal(data[2].error, "Connection refused");
+});
+
+test("GET /api/activity filters by API and validates its query", async () => {
+  const { idle } = await seedChecks();
+  assert.deepEqual((await getActivity(`?projectId=${idle.id}`)).json<ActivityBody>().data, []);
+  assert.equal((await getActivity("?projectId=999999")).statusCode, 404);
+
+  const tooMany = await getActivity("?limit=500");
+  assert.equal(tooMany.statusCode, 400);
+  assert.deepEqual(tooMany.json<ErrorBody>(), { error: { message: "limit must be at most 200" } });
+  assert.equal((await getActivity("?limit=abc")).statusCode, 400);
+  assert.equal((await getActivity("?changes=yes")).statusCode, 400);
+});
+
+test("GET /api/health reports whether the monitoring engine is running", async () => {
+  const res = await app.inject({ method: "GET", url: "/api/health" });
+  assert.deepEqual(res.json<{ monitoring: unknown }>().monitoring, { running: false, lastRunAt: null });
+});

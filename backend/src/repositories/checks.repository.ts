@@ -56,3 +56,38 @@ export async function deleteChecksBefore(cutoff: Date): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>("DELETE FROM checks WHERE checked_at < ?", [cutoff]);
   return result.affectedRows;
 }
+
+export interface RecentCheckRow extends RowDataPacket {
+  id: number;
+  project_id: number;
+  name: string;
+  checked_at: Date;
+  outcome: CheckOutcome;
+  previous_outcome: CheckOutcome | null;
+  status_code: number | null;
+  latency_ms: number | null;
+  error: string | null;
+}
+
+/**
+ * Newest checks since `from`, each with the outcome of the same API's previous check (LAG), so
+ * callers can tell status changes from routine checks. `changesOnly` keeps just the changes.
+ */
+export async function findRecentChecks(options: { from: Date; limit: number; projectId?: string; changesOnly?: boolean }) {
+  const params: unknown[] = [options.from];
+  if (options.projectId) params.push(options.projectId);
+  params.push(options.limit);
+  const [rows] = await pool.query<RecentCheckRow[]>(
+    `SELECT * FROM (
+       SELECT c.id, c.project_id, p.name, c.checked_at, c.outcome, c.status_code, c.latency_ms, c.error,
+              LAG(c.outcome) OVER (PARTITION BY c.project_id ORDER BY c.checked_at, c.id) AS previous_outcome
+       FROM checks c JOIN projects p ON p.id = c.project_id
+       WHERE c.checked_at >= ?${options.projectId ? " AND c.project_id = ?" : ""}
+     ) recent
+     ${options.changesOnly ? "WHERE previous_outcome IS NOT NULL AND previous_outcome <> outcome" : ""}
+     ORDER BY checked_at DESC, id DESC
+     LIMIT ?`,
+    params,
+  );
+  return rows;
+}
