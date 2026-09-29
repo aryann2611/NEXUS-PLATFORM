@@ -1,7 +1,5 @@
 export type Health = "healthy" | "degraded" | "down" | "pending";
 
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
 /** A registered API as returned by GET /api/projects. */
 export interface Project {
   id: string;
@@ -12,6 +10,7 @@ export interface Project {
   status: Health;
   checkInterval: number;
   timeout: number;
+  lastCheckedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,23 +38,4 @@ export interface NewApiInput {
   uptimeMonitoring: boolean;
   performanceMonitoring: boolean;
   errorTracking: boolean;
-}
-
-export interface Endpoint {
-  id: string;
-  method: HttpMethod;
-  path: string;
-  health: Health;
-  latencyMs: number;
-  errorRatePercent: number;
-  lastCheckedAt: string;
-}
-
-export interface ActivityEvent {
-  id: string;
-  at: string;
-  apiName: string;
-  event: string;
-  health: Health;
-  details: string;
 }

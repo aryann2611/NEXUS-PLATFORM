@@ -2,12 +2,15 @@ import Fastify, { type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import { env } from "./config/env.js";
 import { isDatabaseUnavailable, pool } from "./db/database.js";
+import { activityRoutes } from "./routes/activity.routes.js";
 import { healthRoutes } from "./routes/health.routes.js";
+import { startMonitoring } from "./monitoring/worker.js";
 import { projectsRoutes } from "./routes/projects.routes.js";
+import { reportsRoutes } from "./routes/reports.routes.js";
 import { isHttpUrl } from "./schemas/projects.schema.js";
 import { describeValidationIssue } from "./schemas/validation-message.js";
 
-export async function buildApp({ logger = true } = {}) {
+export async function buildApp({ logger = true, monitoring = false } = {}) {
   const app = Fastify({
     logger,
     ajv: {
@@ -37,11 +40,18 @@ export async function buildApp({ logger = true } = {}) {
     });
   });
 
-  app.addHook("onClose", () => pool.end());
+  // The monitoring engine runs in-process; stop it before closing the pool it writes through.
+  const stopMonitoring = monitoring ? startMonitoring(app.log) : null;
+  app.addHook("onClose", async () => {
+    await stopMonitoring?.();
+    await pool.end();
+  });
 
   await app.register(cors, { origin: env.frontendUrl });
   await app.register(healthRoutes);
   await app.register(projectsRoutes);
+  await app.register(reportsRoutes);
+  await app.register(activityRoutes);
 
   return app;
 }

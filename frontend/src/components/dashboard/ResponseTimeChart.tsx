@@ -14,9 +14,11 @@ const tick = { fill: colors.tick, fontSize: 11 };
 interface ResponseTimeChartProps {
   data: LatencyPoint[];
   thresholdMs: number;
+  /** Shortens axis labels; the tooltip keeps the full `time`. */
+  tickFormatter?: (label: string) => string;
 }
 
-export default function ResponseTimeChart({ data, thresholdMs }: ResponseTimeChartProps) {
+export default function ResponseTimeChart({ data, thresholdMs, tickFormatter }: ResponseTimeChartProps) {
   return (
     <div className="px-2 pb-4 font-mono">
       <ResponsiveContainer width="100%" height={260}>
@@ -28,7 +30,7 @@ export default function ResponseTimeChart({ data, thresholdMs }: ResponseTimeCha
             </linearGradient>
           </defs>
           <CartesianGrid stroke={colors.grid} vertical={false} />
-          <XAxis dataKey="time" tick={tick} tickLine={false} axisLine={false} interval={3} dy={6} />
+          <XAxis dataKey="time" tick={tick} tickLine={false} axisLine={false} interval={3} dy={6} tickFormatter={tickFormatter} />
           <YAxis tick={tick} tickLine={false} axisLine={false} width={56} tickFormatter={(value) => `${value}ms`} />
           <Tooltip
             cursor={{ stroke: "#2a2a2a" }}

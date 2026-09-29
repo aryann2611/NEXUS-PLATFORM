@@ -9,6 +9,7 @@ export interface Project {
   status: ProjectStatus;
   checkInterval: number;
   timeout: number;
+  lastCheckedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
