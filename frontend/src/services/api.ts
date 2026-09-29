@@ -1,5 +1,6 @@
 import type { NewApiInput, Project } from "../types/api";
 import type { HealthResponse } from "../types/health";
+import type { Report, ReportRange } from "../types/report";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -39,4 +40,10 @@ export async function createProject(input: NewApiInput): Promise<Project> {
     }),
   });
   return data;
+}
+
+export async function getReport(range: ReportRange, projectId?: string): Promise<Report> {
+  const query = new URLSearchParams({ range });
+  if (projectId) query.set("projectId", projectId);
+  return (await request<{ data: Report }>(`/api/reports?${query}`)).data;
 }

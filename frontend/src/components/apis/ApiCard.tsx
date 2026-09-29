@@ -3,7 +3,7 @@ import { timeAgo } from "../../lib/format";
 import { healthTone, toneText } from "../../lib/status";
 import type { MonitoredApi } from "../../types/api";
 import { StatusBadge } from "../common/Badge";
-import { Button } from "../common/Button";
+import { ButtonLink } from "../common/Button";
 import Sparkline from "../common/Sparkline";
 
 function Metric({ label, value }: { label: string; value: string }) {
@@ -43,11 +43,9 @@ export default function ApiCard({ api }: { api: MonitoredApi }) {
           <Clock size={13} />
           {api.lastCheckedAt ? `Last checked ${timeAgo(api.lastCheckedAt)}` : "Not checked yet"}
         </p>
-        <span title="API details arrive in a later phase">
-          <Button variant="secondary" size="sm" disabled>
-            View Details <ArrowRight size={14} />
-          </Button>
-        </span>
+        <ButtonLink to={`/reports?api=${api.id}`} size="sm">
+          View Report <ArrowRight size={14} />
+        </ButtonLink>
       </div>
     </article>
   );

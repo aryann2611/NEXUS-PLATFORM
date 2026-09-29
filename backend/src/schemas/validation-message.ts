@@ -12,6 +12,8 @@ const labels: Record<string, string> = {
   tags: "tags",
   checkInterval: "checkInterval",
   timeout: "timeout",
+  range: "range",
+  projectId: "projectId",
 };
 
 /** Turns the first Ajv issue into a readable sentence that still names the offending field. */
@@ -29,6 +31,8 @@ export function describeValidationIssue(issue: ValidationIssue, prefix = "body")
       return issue.params.format === "http-url"
         ? `${where} must be a valid http(s) URL, e.g. https://api.example.com`
         : `${where} has an invalid format`;
+    case "enum":
+      return `${where} must be one of: ${(issue.params.allowedValues as unknown[]).join(", ")}`;
     case "type":
       return `${where} must be of type ${String(issue.params.type)}`;
     case "minimum":

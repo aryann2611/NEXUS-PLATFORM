@@ -24,7 +24,7 @@ Run a single backend test by name (from `backend/`):
 npx tsx --test --test-name-pattern="duplicate name" src/routes/projects.routes.test.ts
 ```
 
-Backend tests are integration tests against a **real MySQL database**, not mocks. The test file sets `DB_NAME=nexus_test` *before* dynamically importing the app (env is read at import time), runs migrations in `before`, and clears `projects` in `beforeEach`. DB credentials come from `backend/.env` or `DB_*` env vars. There are no frontend tests.
+Backend route tests are integration tests against a **real MySQL database**, not mocks. Each DB test file sets `DB_NAME=nexus_test` (and any other env) *before* dynamically importing the app (env is read at import time), runs migrations in `before`, and clears `projects` in `beforeEach` (checks cascade). Files share that database, so `npm test` runs them with `--test-concurrency=1`; keep it that way. DB credentials come from `backend/.env` or `DB_*` env vars. Checker tests use a throwaway local HTTP server and need no DB. There are no frontend tests.
 
 CI (`.github/workflows/ci.yml`) runs backend typecheck + tests against a MySQL 8 service (root, empty password) and frontend lint + build.
 
@@ -41,6 +41,10 @@ Cross-cutting behaviour lives in `app.ts` (`buildApp()`, used by both `server.ts
 - The not-found and error handlers must be registered **before** routes (Fastify plugins copy them at registration time).
 - `/api/health` runs `SELECT 1`, so it reports 503 when the DB is down; the frontend's "Connected" indicator depends on this.
 
+Monitoring engine (`monitoring/`): `server.ts` calls `buildApp({ monitoring: true })`, which starts `startMonitoring()` and stops it in `onClose` before the pool closes; tests build the app without it and call `runDueChecks()` directly. A tick selects due projects (`findDueProjects`: never checked, or `last_checked_at` older than `check_interval`), runs `checkUrl`, and `recordCheck` inserts the check and updates `projects.status`/`last_checked_at` in one transaction. Outcome rules and thresholds are in `checker.ts`. `checkUrl` uses `node:http(s)` rather than `fetch` so it can pass `guardedLookup` (`network-guard.ts`), which rejects private/internal addresses at connect time (DNS-rebinding safe); IP-literal URLs are checked before connecting because Node skips `lookup` for them. Don't add `::ffff:0:0/96` to the `BlockList`: Node matches it against every IPv4 address.
+
+Reports (`services/reports.service.ts`): `GET /api/reports` loads the range's checks ordered by project and time and aggregates in JS (percentiles are nearest-rank; incidents are runs of non-healthy checks). Bucket width depends on range (24h → 1h, 7d → 6h, 30d → 1d) and buckets are aligned to UTC. Aggregating in JS keeps it portable across MySQL/MariaDB but loads every check in the range; move to SQL rollups if check volume grows large.
+
 Database: migrations are plain `.sql` files in `db/migrations/`, applied in filename order by `db/migrator.ts` and tracked in `schema_migrations`. Add a new numbered file; never edit an applied one. The pool pins sessions to UTC. BIGINT ids are exposed to clients as strings. Duplicate project names (unique key, case-insensitive collation) surface as 409 via `isDuplicateEntry` → `null` from the repository.
 
 CORS only allows `FRONTEND_URL` (default `http://localhost:5173`), so open the frontend on `localhost`, not `127.0.0.1`.
@@ -54,9 +58,10 @@ React 19 + React Router 7 + Tailwind CSS v4 (configured in `index.css` via `@the
 - `AppLayout` calls `useHealth()` once (polls every 30s) and passes it to pages through the router outlet context (`useOutletContext<LayoutContext>()`).
 - Pages are lazy-loaded in `App.tsx`; `AppLayout` wraps the `<Outlet>` in `Suspense`.
 - The header search navigates to `/apis?q=…`; the APIs page reads its filter from the URL query.
-- **Real vs. sample data:** only the API registry and backend connection status are real. Dashboard metrics, Monitoring, and Recent Activity come from `src/mock/` and must stay labelled "Sample data" in the UI. Load Tests and Reports are UI shells.
+- **Real vs. sample data:** the API registry, backend status, API card uptime/latency (`useApis` merges a 24h report) and the Reports page are real. Dashboard metrics, Monitoring, and Recent Activity still come from `src/mock/` and must stay labelled "Sample data". Load Tests is a UI shell.
+- `pages/Reports.tsx` keeps its state (`range`, `api`, `tab`) in the URL query, so API cards link to `/reports?api=<id>`. Frontend report types in `types/report.ts` mirror `backend/src/types/report.ts`; change both together.
 - Status colours/labels are centralised in `lib/status.ts` (tone maps); use them rather than hardcoding Tailwind colour classes.
 
 ## Roadmap context
 
-Next planned work is a health-check worker that measures registered APIs and replaces the mock data, then k6 load testing, auth, alerts and reports. When the worker fetches user-supplied `baseUrl`s, add SSRF protection (the API currently accepts internal addresses such as `169.254.169.254`).
+Next planned work is replacing the Dashboard and Monitoring sample data with monitoring results, then k6 load testing (in progress on `feature/k6-load-tests`), auth and alerts.

@@ -12,6 +12,7 @@ export interface Project {
   status: Health;
   checkInterval: number;
   timeout: number;
+  lastCheckedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

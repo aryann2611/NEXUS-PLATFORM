@@ -10,8 +10,9 @@ export interface DashboardSummary {
 
 export interface LatencyPoint {
   time: string;
-  p50: number;
-  p95: number;
+  /** null where nothing was measured; the chart leaves a gap. */
+  p50: number | null;
+  p95: number | null;
 }
 
 export interface UptimeHistoryRow {
