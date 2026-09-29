@@ -5,6 +5,7 @@ import { isDatabaseUnavailable, pool } from "./db/database.js";
 import { healthRoutes } from "./routes/health.routes.js";
 import { projectsRoutes } from "./routes/projects.routes.js";
 import { isHttpUrl } from "./schemas/projects.schema.js";
+import { describeValidationIssue } from "./schemas/validation-message.js";
 
 export async function buildApp({ logger = true } = {}) {
   const app = Fastify({
@@ -25,6 +26,9 @@ export async function buildApp({ logger = true } = {}) {
     if (isDatabaseUnavailable(error)) {
       request.log.error(error);
       return reply.status(503).send({ error: { message: "Database unavailable" } });
+    }
+    if (error.validation?.length) {
+      return reply.status(400).send({ error: { message: describeValidationIssue(error.validation[0]) } });
     }
     const statusCode = error.statusCode ?? 500;
     if (statusCode >= 500) request.log.error(error);

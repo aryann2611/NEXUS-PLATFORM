@@ -28,6 +28,12 @@ before(() => runMigrations(() => {}));
 beforeEach(() => pool.query("DELETE FROM projects"));
 after(() => app.close());
 
+test("GET /api/health reports ok while the database answers", async () => {
+  const res = await app.inject({ method: "GET", url: "/api/health" });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.json<{ status: string }>().status, "ok");
+});
+
 test("POST /api/projects stores a pending project", async () => {
   const res = await createProject(validBody);
   assert.equal(res.statusCode, 201);
@@ -87,6 +93,24 @@ test("rejects a base URL that isn't http(s)", async () => {
     assert.equal(res.statusCode, 400, baseUrl);
     assert.match(res.json<ErrorBody>().error.message, /baseUrl/);
   }
+});
+
+test("validation errors are readable, not raw Ajv output", async () => {
+  const cases: [object, string][] = [
+    [{ baseUrl: "ftp://files.example.com" }, "baseUrl must be a valid http(s) URL, e.g. https://api.example.com"],
+    [{ name: "a".repeat(101) }, "name must be at most 100 characters"],
+    [{ name: "   " }, "name can't be blank"],
+    [{ checkInterval: 5 }, "checkInterval must be at least 30"],
+    [{ timeout: 120 }, "timeout must be at most 30"],
+    [{ status: "healthy" }, 'Unknown field "status"'],
+  ];
+  for (const [override, message] of cases) {
+    const res = await createProject({ ...validBody, ...override });
+    assert.equal(res.statusCode, 400, message);
+    assert.deepEqual(res.json<ErrorBody>(), { error: { message } });
+  }
+  const { name: _name, ...body } = validBody;
+  assert.deepEqual((await createProject(body)).json<ErrorBody>(), { error: { message: "name is required" } });
 });
 
 test("rejects a missing name", async () => {

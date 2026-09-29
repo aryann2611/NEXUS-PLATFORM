@@ -12,8 +12,13 @@ export const pool = mysql.createPool({
 });
 
 // TIMESTAMP values are returned in the session time zone; pin it to UTC to match `timezone: "Z"`.
+// At runtime mysql2 emits the callback-style connection here (its typings say promise), and a query
+// without a callback would raise an unhandled "error" event on failure, so pass one and just log.
 pool.on("connection", (connection) => {
-  void connection.query("SET time_zone = '+00:00'");
+  const { query } = connection as unknown as { query(sql: string, done: (error: Error | null) => void): void };
+  query.call(connection, "SET time_zone = '+00:00'", (error) => {
+    if (error) console.error("Couldn't set the session time zone:", error.message);
+  });
 });
 
 const unavailableCodes = new Set([

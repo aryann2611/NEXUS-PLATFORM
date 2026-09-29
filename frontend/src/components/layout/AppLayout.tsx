@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { useHealth, type HealthState } from "../../hooks/useHealth";
 import Header from "./Header";
@@ -24,7 +24,9 @@ export default function AppLayout() {
           key={pathname}
           className="mx-auto max-w-7xl bg-[radial-gradient(80%_40%_at_100%_0%,rgb(255_255_255/0.025),transparent)] px-4 py-6 motion-safe:animate-fade-in sm:px-6 lg:px-8 lg:py-8"
         >
-          <Outlet context={{ health } satisfies LayoutContext} />
+          <Suspense fallback={<p role="status" className="py-24 text-center text-sm text-neutral-500">Loading…</p>}>
+            <Outlet context={{ health } satisfies LayoutContext} />
+          </Suspense>
         </main>
       </div>
     </div>
