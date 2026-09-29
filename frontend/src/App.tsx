@@ -1,11 +1,14 @@
+import { lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
-import Apis from "./pages/Apis";
-import Dashboard from "./pages/Dashboard";
-import LoadTests from "./pages/LoadTests";
-import Monitoring from "./pages/Monitoring";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
+
+// Each page is its own chunk so heavy dependencies (Recharts) load only where they're used.
+const Apis = lazy(() => import("./pages/Apis"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const LoadTests = lazy(() => import("./pages/LoadTests"));
+const Monitoring = lazy(() => import("./pages/Monitoring"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 export default function App() {
   return (

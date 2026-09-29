@@ -50,6 +50,7 @@ Run them individually with `npm run dev:frontend` / `npm run dev:backend`.
 | `npm run db:migrate` | Creates the database if needed and applies pending `backend/src/db/migrations/*.sql` files (tracked in `schema_migrations`) |
 | `npm run db:seed` | Registers real, key-free public APIs; safe to run repeatedly |
 | `npm test` | Backend API tests against the `nexus_test` database (created automatically) |
+| `npm run lint` / `npm run typecheck` | Frontend lint; type-check backend and frontend (CI runs these on every pull request) |
 
 ## API
 
@@ -57,7 +58,7 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| `GET` | `/api/health` | `{ status, service, timestamp }` |
+| `GET` | `/api/health` | `{ status, service, timestamp }`; `503` when the database is unreachable |
 | `GET` | `/api/projects` | All registered APIs, newest first |
 | `GET` | `/api/projects/:id` | One API, or `404` |
 | `POST` | `/api/projects` | Register an API → `201` |
