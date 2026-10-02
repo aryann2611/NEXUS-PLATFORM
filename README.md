@@ -89,6 +89,6 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 | Uptime, latency, endpoint counts per API | Not measured yet — shown as `—` / "Pending" |
 | Load Tests | Real — runs k6 against a target URL and streams live results (requests, req/s, avg, p95, p99, error rate). Capped at 50 virtual users / 60s. |
 | Dashboard metrics, Monitoring page, Recent Activity | Sample data from `frontend/src/mock/`, labelled "Sample data" |
-| Reports | UI foundation only |
+| Reports | Load-test reports are real, built from every completed run (stored in the browser). Performance, Uptime and Historical Analytics reports are labelled "Planned" — they need the health-check worker below. |
 
 Next up: a health-check worker that measures registered APIs and replaces the sample data. Authentication, alerts and reports come after that.
