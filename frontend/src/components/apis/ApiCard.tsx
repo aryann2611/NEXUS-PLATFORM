@@ -17,9 +17,9 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 export default function ApiCard({ api }: { api: MonitoredApi }) {
   return (
-    <article className="rounded-xl border border-line bg-surface p-5 transition-colors hover:border-line-strong">
+    <article className="surface-card group p-5 transition duration-300 hover:-translate-y-1 hover:border-neutral-400/40 sm:p-6">
       <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-line bg-surface-3 text-neutral-300">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/5 text-neutral-200 transition-transform duration-300 group-hover:scale-110">
           <Box size={18} strokeWidth={1.75} />
         </span>
         <div className="min-w-0 flex-1">
@@ -29,7 +29,7 @@ export default function ApiCard({ api }: { api: MonitoredApi }) {
         <StatusBadge health={api.health} />
       </div>
 
-      <div className="mt-5 flex items-end justify-between gap-4">
+      <div className="mt-6 flex items-end justify-between gap-4">
         <div className="flex divide-x divide-line">
           <Metric label="Endpoints" value={api.endpointCount === null ? "—" : String(api.endpointCount)} />
           <Metric label="Uptime" value={api.uptimePercent === null ? "—" : `${api.uptimePercent}%`} />
@@ -38,7 +38,7 @@ export default function ApiCard({ api }: { api: MonitoredApi }) {
         {api.latencyTrend.length > 1 && <Sparkline values={api.latencyTrend} className={`hidden sm:block ${toneText[healthTone[api.health]]}`} />}
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-line pt-4">
         <p className="flex items-center gap-1.5 text-xs text-neutral-500">
           <Clock size={13} />
           {api.lastCheckedAt ? `Last checked ${timeAgo(api.lastCheckedAt)}` : "Not checked yet"}

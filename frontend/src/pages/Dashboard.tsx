@@ -15,10 +15,10 @@ export default function Dashboard() {
   const { health } = useOutletContext<LayoutContext>();
 
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <PageHeader eyebrow="Overview" title="Dashboard" description="Health and performance across your APIs." actions={<Badge>Sample data</Badge>} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Uptime"
           value={`${summary.uptimePercent}%`}

@@ -10,7 +10,7 @@ export default function ActivityTable({ events }: { events: ActivityEvent[] }) {
     <div className="overflow-x-auto border-t border-line">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-line text-left text-[11px] uppercase tracking-wider text-neutral-500">
+          <tr className="border-b border-line bg-white/[0.015] text-left text-[10px] font-bold uppercase tracking-[.16em] text-neutral-500">
             <th className={`${th} hidden sm:table-cell`}>Time</th>
             <th className={th}>API</th>
             <th className={th}>Event</th>
@@ -21,7 +21,7 @@ export default function ActivityTable({ events }: { events: ActivityEvent[] }) {
           {events.map((event) => {
             const tone = healthTone[event.health];
             return (
-              <tr key={event.id} className="transition-colors hover:bg-white/[0.02]">
+              <tr key={event.id} className="transition-colors duration-200 hover:bg-white/[0.045]">
                 <td className="hidden px-5 py-3 whitespace-nowrap text-neutral-500 sm:table-cell">{timeAgo(event.at, "long")}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-neutral-200">{event.apiName}</td>
                 <td className="px-5 py-3">

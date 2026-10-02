@@ -9,7 +9,7 @@ export default function EndpointTable({ endpoints }: { endpoints: Endpoint[] }) 
     <div className="overflow-x-auto border-t border-line">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-line text-left text-[11px] uppercase tracking-wider text-neutral-500">
+          <tr className="border-b border-line bg-white/[0.015] text-left text-[10px] font-bold uppercase tracking-[.16em] text-neutral-500">
             <th className={th}>Method</th>
             <th className={th}>Endpoint</th>
             <th className={th}>Status</th>
@@ -20,9 +20,9 @@ export default function EndpointTable({ endpoints }: { endpoints: Endpoint[] }) 
         </thead>
         <tbody className="divide-y divide-line">
           {endpoints.map((endpoint) => (
-            <tr key={endpoint.id} className="transition-colors hover:bg-white/[0.02]">
+            <tr key={endpoint.id} className="transition-colors duration-200 hover:bg-white/[0.045]">
               <td className="px-5 py-3">
-                <span className="inline-block w-14 rounded border border-line bg-surface-3 py-0.5 text-center font-mono text-[11px] font-medium text-neutral-300">
+                <span className="inline-block w-14 rounded-md border border-line bg-surface-3 py-1 text-center font-mono text-[11px] font-medium text-neutral-200">
                   {endpoint.method}
                 </span>
               </td>

@@ -8,7 +8,7 @@ import { uptimeHistory, uptimeWindowDays } from "../mock/monitoring";
 
 export default function Monitoring() {
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <PageHeader
         eyebrow="Observe"
         title="Monitoring"

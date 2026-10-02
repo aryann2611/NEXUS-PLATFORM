@@ -21,7 +21,7 @@ interface ApiFiltersProps {
 
 export default function ApiFilters({ query, onQueryChange, status, onStatusChange, sort, onSortChange, counts }: ApiFiltersProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="surface-card flex flex-wrap items-center gap-3 p-3 sm:p-4">
       <div className="relative w-full sm:w-64">
         <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500" />
         <Input type="search" value={query} onChange={(e) => onQueryChange(e.target.value)} placeholder="Search APIs…" aria-label="Filter APIs" className="pl-9" />
@@ -34,10 +34,10 @@ export default function ApiFilters({ query, onQueryChange, status, onStatusChang
             type="button"
             aria-pressed={status === filter.value}
             onClick={() => onStatusChange(filter.value)}
-            className={`h-8 rounded-full border px-3 text-xs transition-colors ${
+            className={`h-8 rounded-full border px-3 text-xs font-medium transition ${
               status === filter.value
-                ? "border-neutral-400 bg-white/[0.06] text-neutral-50"
-                : "border-line text-neutral-400 hover:border-line-strong hover:text-neutral-200"
+                ? "border-neutral-300/60 bg-white/10 text-white shadow-sm shadow-black/30"
+                : "border-line text-neutral-400 hover:border-neutral-400/50 hover:text-neutral-200"
             }`}
           >
             {filter.label} ({counts[filter.value]})

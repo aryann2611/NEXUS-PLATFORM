@@ -22,7 +22,7 @@ export default function Settings() {
   const { health } = useOutletContext<LayoutContext>();
 
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <PageHeader eyebrow="Workspace" title="Settings" description="Connection details for this NEXUS instance." />
 
       <Card title="Backend Connection" description="Where the dashboard sends its API requests.">

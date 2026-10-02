@@ -40,7 +40,7 @@ export default function Apis() {
           : { icon: SearchX, title: "No APIs match your filters", description: "Try a different search term or status filter." };
 
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <PageHeader
         eyebrow="Observe"
         title="APIs"
@@ -52,7 +52,7 @@ export default function Apis() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total APIs" value={count(counts.all)} hint="Registered" icon={Layers} />
         <StatCard label="Healthy" value={count(counts.healthy)} hint={shareOfTotal(counts.healthy)} icon={HeartPulse} tone="healthy" />
         <StatCard label="Degraded" value={count(counts.degraded)} hint={shareOfTotal(counts.degraded)} icon={TriangleAlert} tone="degraded" />
@@ -70,7 +70,7 @@ export default function Apis() {
       />
 
       {ready && visibleApis.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="stagger grid grid-cols-1 gap-4 xl:grid-cols-2">
           {visibleApis.map((api) => (
             <ApiCard key={api.id} api={api} />
           ))}
