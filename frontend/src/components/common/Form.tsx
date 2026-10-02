@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
 const control =
-  "w-full rounded-lg border border-line bg-surface-2 px-3 text-sm text-neutral-100 outline-none transition-colors placeholder:text-neutral-600 hover:border-line-strong focus:border-neutral-500 user-invalid:border-red-500/60";
+  "w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-600 hover:border-line-strong focus:border-neutral-300/70 focus:ring-4 focus:ring-white/10 user-invalid:border-red-500/60";
 
 interface FieldProps {
   label: string;
@@ -15,7 +15,7 @@ interface FieldProps {
 export function Field({ label, htmlFor, hint, required, optional, children }: FieldProps) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-neutral-200">
+      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-semibold text-neutral-200">
         {label}
         {required && <span className="text-red-400"> *</span>}
         {optional && <span className="font-normal text-neutral-500"> (Optional)</span>}

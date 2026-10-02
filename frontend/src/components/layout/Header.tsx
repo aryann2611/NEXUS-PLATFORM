@@ -31,7 +31,7 @@ export default function Header({ menuOpen, onMenuClick }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-canvas px-4 sm:px-6 lg:px-8">
+    <header className="glass sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b border-line/80 px-4 sm:px-6 lg:px-10">
       <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick} aria-label="Open navigation" aria-expanded={menuOpen} aria-controls="sidebar">
         <Menu size={18} />
       </Button>
@@ -44,7 +44,7 @@ export default function Header({ menuOpen, onMenuClick }: HeaderProps) {
           type="search"
           placeholder="Search APIs by name or URL…"
           aria-label="Search APIs"
-          className="peer h-9 w-full rounded-lg border border-line bg-surface pr-16 pl-9 text-sm text-neutral-100 outline-none transition-colors placeholder:text-neutral-500 hover:border-line-strong focus:border-neutral-500"
+          className="peer h-10 w-full rounded-xl border border-line bg-surface/80 pr-16 pl-9 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 hover:border-line-strong focus:border-neutral-400/60 focus:ring-4 focus:ring-white/10"
         />
         <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 gap-1 font-sans text-[11px] text-neutral-500 sm:peer-placeholder-shown:flex">
           <span className="rounded border border-line bg-surface-3 px-1.5 py-0.5">Ctrl</span>

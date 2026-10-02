@@ -13,20 +13,20 @@ const reportTypes = [
 
 export default function Reports() {
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <PageHeader eyebrow="Analyze" title="Reports" description="Performance, uptime and load-test reports for your APIs." />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {reportTypes.map(({ icon: Icon, title, description }) => (
-          <div key={title} className="rounded-xl border border-line bg-surface p-5">
+          <div key={title} className="surface-card group p-5 transition duration-300 hover:-translate-y-1 hover:border-line-strong">
             <div className="flex items-start justify-between gap-3">
-              <span className="grid size-9 place-items-center rounded-lg border border-line bg-surface-3 text-neutral-300">
+              <span className="grid size-10 place-items-center rounded-xl border border-line bg-surface-3 text-neutral-300 transition-transform duration-300 group-hover:scale-110">
                 <Icon size={17} />
               </span>
               <Badge>Coming soon</Badge>
             </div>
-            <h2 className="mt-4 font-medium text-neutral-100">{title}</h2>
-            <p className="mt-1 text-sm text-neutral-500">{description}</p>
+            <h2 className="mt-5 font-semibold text-neutral-100">{title}</h2>
+            <p className="mt-1 text-sm leading-6 text-neutral-400">{description}</p>
           </div>
         ))}
       </div>

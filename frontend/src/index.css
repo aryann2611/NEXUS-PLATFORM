@@ -3,51 +3,42 @@
 @theme {
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-
   --color-canvas: #050505;
   --color-surface: #080808;
   --color-surface-2: #0c0c0c;
   --color-surface-3: #101010;
   --color-line: #1c1c1c;
   --color-line-strong: #2a2a2a;
-
-  --animate-fade-in: fade-in 0.2s ease-out;
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-  }
+  --animate-fade-in: page-in .52s cubic-bezier(.16,1,.3,1) both;
+  --animate-float: float 10s ease-in-out infinite;
+  @keyframes page-in { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes float { 50% { transform: translateY(-10px); } }
 }
 
 @layer base {
-  html {
-    color-scheme: dark;
-  }
-
-  body {
-    @apply bg-canvas font-sans text-neutral-100 antialiased;
-  }
+  html { color-scheme: dark; background: #050505; }
+  body { @apply min-w-80 bg-canvas font-sans text-neutral-100 antialiased; }
+  body::before { content: ""; position: fixed; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(ellipse 65% 45% at 78% -10%, rgb(255 255 255 / .04), transparent 70%), radial-gradient(ellipse 48% 35% at 2% 100%, rgb(255 255 255 / .02), transparent 70%); }
 
   :focus-visible {
-    outline: 2px solid rgb(255 255 255 / 0.4);
-    outline-offset: 2px;
+    outline: 2px solid #f5f5f5;
+    outline-offset: 3px;
   }
 
   ::selection {
-    background: rgb(255 255 255 / 0.2);
+    background: rgb(255 255 255 / .25);
   }
 }
 
 @layer components {
-  /* Native <dialog> slide-in; allow-discrete keeps the exit animation running before display:none. */
+  .glass { background: linear-gradient(135deg, rgb(10 10 10 / .92), rgb(2 2 2 / .95)); backdrop-filter: blur(18px); }
+  .surface-card { @apply relative overflow-hidden rounded-2xl border border-line; background: linear-gradient(135deg, rgb(12 12 12 / .95), rgb(3 3 3 / .96)); box-shadow: inset 0 1px rgb(255 255 255 / .025), 0 18px 45px rgb(0 0 0 / .3); }
+  .surface-card::before { content:""; position:absolute; left:0; right:0; top:0; height:1px; background:linear-gradient(90deg, transparent, rgb(255 255 255 / .18), transparent); }
+  .stagger > * { animation: page-in .55s cubic-bezier(.16,1,.3,1) both; }
+  .stagger > :nth-child(2) { animation-delay: .06s; } .stagger > :nth-child(3) { animation-delay: .12s; } .stagger > :nth-child(4) { animation-delay: .18s; } .stagger > :nth-child(5) { animation-delay: .24s; } .stagger > :nth-child(6) { animation-delay: .3s; }
   .drawer {
     translate: 100% 0;
-    transition:
-      translate 0.25s ease-out,
-      display 0.25s allow-discrete,
-      overlay 0.25s allow-discrete;
+    transition: translate .35s cubic-bezier(.16,1,.3,1), display .35s allow-discrete, overlay .35s allow-discrete;
   }
 
   .drawer[open] {
@@ -56,14 +47,13 @@
 
   .drawer::backdrop {
     background: rgb(0 0 0 / 0);
-    transition:
-      background-color 0.25s,
-      display 0.25s allow-discrete,
-      overlay 0.25s allow-discrete;
+    backdrop-filter: blur(0);
+    transition: background-color .35s, backdrop-filter .35s, display .35s allow-discrete, overlay .35s allow-discrete;
   }
 
   .drawer[open]::backdrop {
-    background: rgb(0 0 0 / 0.6);
+    background: rgb(0 0 0 / .72);
+    backdrop-filter: blur(5px);
   }
 
   @starting-style {
@@ -77,9 +67,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .drawer,
-    .drawer::backdrop {
-      transition: none;
-    }
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   }
 }

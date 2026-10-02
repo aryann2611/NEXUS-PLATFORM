@@ -42,7 +42,7 @@ export default function LoadTests() {
   const progress = snapshot ? Math.min(100, (snapshot.elapsedMs / snapshot.durationMs) * 100) : running ? 3 : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <PageHeader eyebrow="Test" title="Load Tests" description="Drive real traffic at an endpoint with k6 and watch it respond live." />
 
       <div className="grid gap-4 xl:grid-cols-3">
@@ -87,12 +87,12 @@ export default function LoadTests() {
           actions={snapshot && <Badge tone={running ? "neutral" : "healthy"} dot>{running ? "Running" : "Complete"}</Badge>}
         >
           <div className="h-0.5 w-full bg-line" role="presentation">
-            <div className="h-full bg-neutral-300 transition-[width] duration-500 ease-linear" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-gradient-to-r from-neutral-400 to-neutral-50 transition-[width] duration-500 ease-linear" style={{ width: `${progress}%` }} />
           </div>
 
           <dl className="grid grid-cols-2 gap-px border-b border-line bg-line sm:grid-cols-3">
             {metrics.map((metric) => (
-              <div key={metric.label} className="bg-surface px-5 py-4">
+              <div key={metric.label} className="bg-surface px-5 py-4 transition-colors hover:bg-surface-2">
                 <dt className="text-xs text-neutral-500">{metric.label}</dt>
                 <dd className={`mt-1 font-mono text-xl ${snapshot ? "text-neutral-50" : "text-neutral-600"}`}>{metric.value}</dd>
               </div>

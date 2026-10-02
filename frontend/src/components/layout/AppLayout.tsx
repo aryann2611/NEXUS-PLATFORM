@@ -14,15 +14,15 @@ export default function AppLayout() {
   const { pathname } = useLocation();
 
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh overflow-x-hidden">
       <Sidebar open={menuOpen} health={health} onNavigate={() => setMenuOpen(false)} />
-      {menuOpen && <div aria-hidden className="fixed inset-0 z-30 bg-black/60 lg:hidden" onClick={() => setMenuOpen(false)} />}
+      {menuOpen && <div aria-hidden className="fixed inset-0 z-30 bg-black/70 backdrop-blur-sm lg:hidden" onClick={() => setMenuOpen(false)} />}
 
-      <div className="lg:pl-64">
+      <div className="lg:pl-72">
         <Header menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)} />
         <main
           key={pathname}
-          className="mx-auto max-w-7xl bg-[radial-gradient(80%_40%_at_100%_0%,rgb(255_255_255/0.025),transparent)] px-4 py-6 motion-safe:animate-fade-in sm:px-6 lg:px-8 lg:py-8"
+          className="mx-auto max-w-[1500px] px-4 py-7 motion-safe:animate-fade-in sm:px-6 lg:px-10 lg:py-10"
         >
           <Outlet context={{ health } satisfies LayoutContext} />
         </main>

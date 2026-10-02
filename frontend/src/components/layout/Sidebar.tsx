@@ -29,10 +29,10 @@ function SidebarLink({ to, label, icon: Icon, onClick }: NavItem & { onClick: ()
       to={to}
       onClick={onClick}
       className={({ isActive }) =>
-        `relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+        `relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition duration-200 ${
           isActive
-            ? "bg-white/[0.06] text-neutral-50 before:absolute before:inset-y-1.5 before:-left-3 before:w-0.5 before:rounded-r before:bg-neutral-50"
-            : "text-neutral-400 hover:bg-white/[0.03] hover:text-neutral-100"
+            ? "bg-gradient-to-r from-white/10 to-transparent text-neutral-50 before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-r before:bg-neutral-50"
+            : "text-neutral-400 hover:bg-white/[0.04] hover:pl-4 hover:text-neutral-100"
         }`
       }
     >
@@ -44,7 +44,7 @@ function SidebarLink({ to, label, icon: Icon, onClick }: NavItem & { onClick: ()
 
 function Logo() {
   return (
-    <svg viewBox="0 0 32 32" aria-hidden className="size-8 text-neutral-50" fill="none" stroke="currentColor" strokeWidth={1.75}>
+    <svg viewBox="0 0 32 32" aria-hidden className="size-7" fill="none" stroke="currentColor" strokeWidth={1.75}>
       <path d="M8 24V8l16 16V8" />
       <path d="M12 8l12 12" strokeOpacity={0.35} />
     </svg>
@@ -54,8 +54,8 @@ function Logo() {
 function BackendStatus({ health }: { health: HealthState }) {
   const tone = backendTone[health.status];
   return (
-    <div className="rounded-xl border border-line bg-surface-2 p-3">
-      <p className="text-xs text-neutral-500">Backend</p>
+    <div className="rounded-2xl border border-line bg-surface-2/80 p-3.5">
+      <p className="text-[10px] font-bold uppercase tracking-[.15em] text-neutral-500">Backend</p>
       <p className={`mt-1 flex items-center gap-2 text-sm font-medium ${toneText[tone]}`}>
         <StatusDot tone={tone} pulse={health.status === "checking"} />
         {backendLabel[health.status]}
@@ -79,22 +79,22 @@ export default function Sidebar({ open, health, onNavigate }: SidebarProps) {
   return (
     <aside
       id="sidebar"
-      className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-surface bg-[radial-gradient(140%_45%_at_0%_100%,rgb(255_255_255/0.05),transparent_70%)] transition-transform duration-200 lg:translate-x-0 ${
+      className={`glass fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-line bg-[radial-gradient(100%_36%_at_20%_0%,rgb(255_255_255/0.05),transparent_70%)] shadow-2xl shadow-black/50 transition-transform duration-300 lg:translate-x-0 ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <div className="flex h-20 items-center gap-3 px-6">
-        <Logo />
+      <div className="flex h-22 items-center gap-3 px-6">
+        <span className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-neutral-50 to-neutral-300 text-neutral-950 shadow-lg shadow-black/40"><Logo /></span>
         <div>
-          <p className="text-lg leading-none font-semibold tracking-[0.3em]">NEXUS</p>
-          <p className="mt-1 text-xs text-neutral-500">API Intelligence</p>
+          <p className="text-lg leading-none font-bold tracking-[0.22em]">NEXUS</p>
+          <p className="mt-1 text-xs tracking-wide text-neutral-500">OBSERVABILITY STUDIO</p>
         </div>
       </div>
 
-      <nav aria-label="Main" className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+      <nav aria-label="Main" className="flex-1 space-y-6 overflow-y-auto px-4 py-6">
         {sections.map((section) => (
           <div key={section.label}>
-            <p className="px-3 pb-2 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">{section.label}</p>
+            <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">{section.label}</p>
             <ul className="space-y-0.5">
               {section.items.map((item) => (
                 <li key={item.to}>
@@ -106,7 +106,7 @@ export default function Sidebar({ open, health, onNavigate }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="space-y-2 p-3">
+      <div className="space-y-2 p-4">
         <BackendStatus health={health} />
         <SidebarLink to="/settings" label="Settings" icon={Settings} onClick={onNavigate} />
       </div>

@@ -3,9 +3,9 @@ import type { LatencyPoint } from "../../types/metrics";
 
 const colors = {
   p50: "#f5f5f5",
-  p95: "#737373",
+  p95: "#a3a3a3",
   threshold: "#f59e0b",
-  grid: "#1a1a1a",
+  grid: "#1c1c1c",
   tick: "#737373",
 };
 
@@ -23,7 +23,7 @@ export default function ResponseTimeChart({ data, thresholdMs }: ResponseTimeCha
         <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="p50-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colors.p50} stopOpacity={0.14} />
+              <stop offset="0%" stopColor={colors.p50} stopOpacity={0.22} />
               <stop offset="100%" stopColor={colors.p50} stopOpacity={0} />
             </linearGradient>
           </defs>
@@ -32,14 +32,23 @@ export default function ResponseTimeChart({ data, thresholdMs }: ResponseTimeCha
           <YAxis tick={tick} tickLine={false} axisLine={false} width={56} tickFormatter={(value) => `${value}ms`} />
           <Tooltip
             cursor={{ stroke: "#2a2a2a" }}
-            contentStyle={{ background: "#0c0c0c", border: "1px solid #2a2a2a", borderRadius: 8, fontSize: 12 }}
+            contentStyle={{ background: "#0c0c0c", border: "1px solid #2a2a2a", borderRadius: 12, fontSize: 12, boxShadow: "0 12px 30px rgba(0,0,0,.5)" }}
             labelStyle={{ color: "#a3a3a3", marginBottom: 4 }}
             itemStyle={{ padding: 0 }}
             formatter={(value) => `${value}ms`}
           />
           <ReferenceLine y={thresholdMs} stroke={colors.threshold} strokeDasharray="4 4" strokeOpacity={0.6} />
           <Area type="monotone" dataKey="p95" name="p95" stroke={colors.p95} strokeDasharray="3 3" strokeWidth={1.25} fill="none" animationDuration={700} />
-          <Area type="monotone" dataKey="p50" name="p50" stroke={colors.p50} strokeWidth={1.5} fill="url(#p50-fill)" animationDuration={700} />
+          <Area
+            type="monotone"
+            dataKey="p50"
+            name="p50"
+            stroke={colors.p50}
+            strokeWidth={1.5}
+            fill="url(#p50-fill)"
+            animationDuration={700}
+            activeDot={{ r: 3.5, fill: colors.p50, stroke: "#050505", strokeWidth: 2 }}
+          />
         </AreaChart>
       </ResponsiveContainer>
 
