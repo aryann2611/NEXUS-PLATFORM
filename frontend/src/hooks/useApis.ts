@@ -4,7 +4,8 @@ import type { MonitoredApi, NewApiInput, Project } from "../types/api";
 
 export type LoadState = "loading" | "ready" | "error";
 
-// The registry comes from MySQL; metrics stay empty until the monitoring engine measures them.
+// The registry and health-check metrics both come from MySQL; endpointCount needs per-endpoint
+// discovery, which the health checker (base-URL pings only) doesn't do yet.
 function toMonitoredApi(project: Project): MonitoredApi {
   return {
     id: project.id,
@@ -12,10 +13,10 @@ function toMonitoredApi(project: Project): MonitoredApi {
     baseUrl: project.baseUrl,
     health: project.status,
     endpointCount: null,
-    uptimePercent: null,
-    avgLatencyMs: null,
-    lastCheckedAt: null,
-    latencyTrend: [],
+    uptimePercent: project.uptimePercent,
+    avgLatencyMs: project.avgLatencyMs,
+    lastCheckedAt: project.lastCheckedAt,
+    latencyTrend: project.latencyTrend,
   };
 }
 

@@ -3,11 +3,15 @@ import { Badge } from "../components/common/Badge";
 import Card from "../components/common/Card";
 import EmptyState from "../components/common/EmptyState";
 import PageHeader from "../components/common/PageHeader";
+import ApiMetricsTable from "../components/reports/ApiMetricsTable";
 import LoadTestRunsTable from "../components/reports/LoadTestRunsTable";
+import { useApis } from "../hooks/useApis";
 import { getLoadTestHistory } from "../lib/loadTestHistory";
 
 export default function Reports() {
   const runs = getLoadTestHistory();
+  const { apis } = useApis();
+  const measuredApis = apis.filter((api) => api.uptimePercent !== null);
 
   const reportTypes = [
     {
@@ -16,8 +20,18 @@ export default function Reports() {
       description: "Results and comparisons across load-test runs.",
       badge: runs.length > 0 ? { label: `${runs.length} run${runs.length === 1 ? "" : "s"}`, tone: "healthy" as const } : { label: "No runs yet" },
     },
-    { icon: Gauge, title: "Performance", description: "Latency percentiles and throughput per endpoint.", badge: { label: "Planned" } },
-    { icon: Activity, title: "Uptime", description: "Availability and incident history per API.", badge: { label: "Planned" } },
+    {
+      icon: Gauge,
+      title: "Performance",
+      description: "Average latency per API from health checks.",
+      badge: measuredApis.length > 0 ? { label: `${measuredApis.length} API${measuredApis.length === 1 ? "" : "s"}`, tone: "healthy" as const } : { label: "Awaiting checks" },
+    },
+    {
+      icon: Activity,
+      title: "Uptime",
+      description: "Availability over the last 30 days per API.",
+      badge: measuredApis.length > 0 ? { label: `${measuredApis.length} API${measuredApis.length === 1 ? "" : "s"}`, tone: "healthy" as const } : { label: "Awaiting checks" },
+    },
     { icon: ChartLine, title: "Historical Analytics", description: "Long-term trends and regressions over time.", badge: { label: "Planned" } },
   ];
 
@@ -41,6 +55,16 @@ export default function Reports() {
           </div>
         ))}
       </div>
+
+      <Card title="API Performance & Uptime" description="Health-check results per registered API, last 30 days.">
+        {apis.length > 0 ? (
+          <ApiMetricsTable apis={apis} />
+        ) : (
+          <div className="border-t border-line">
+            <EmptyState icon={Activity} title="No APIs registered" description="Register an API from the APIs page to start collecting health-check metrics." />
+          </div>
+        )}
+      </Card>
 
       <Card title="Load Test Reports" description="Every completed k6 run, stored locally in this browser.">
         {runs.length > 0 ? (

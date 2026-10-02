@@ -6,6 +6,7 @@ import { healthRoutes } from "./routes/health.routes.js";
 import { loadTestsRoutes } from "./routes/loadTests.routes.js";
 import { projectsRoutes } from "./routes/projects.routes.js";
 import { isHttpUrl } from "./schemas/projects.schema.js";
+import { startHealthCheckScheduler } from "./services/healthCheck.service.js";
 
 export async function buildApp({ logger = true } = {}) {
   const app = Fastify({
@@ -34,7 +35,11 @@ export async function buildApp({ logger = true } = {}) {
     });
   });
 
-  app.addHook("onClose", () => pool.end());
+  const stopScheduler = startHealthCheckScheduler((error) => app.log.error(error));
+  app.addHook("onClose", () => {
+    stopScheduler();
+    return pool.end();
+  });
 
   await app.register(cors, { origin: env.frontendUrl });
   await app.register(healthRoutes);

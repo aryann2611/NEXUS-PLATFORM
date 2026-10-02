@@ -109,9 +109,10 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 | --- | --- |
 | API registry (APIs page, Add API drawer) | Real — stored in MySQL |
 | Backend connection status (sidebar, dashboard, settings) | Real — checked on load and every 30s |
-| Uptime, latency, endpoint counts per API | Not measured yet — shown as `—` / "Pending" |
+| Uptime, avg latency per API | Real — a scheduler pings each registered API's base URL every `checkInterval` seconds and stores the result; uptime is computed over the last 30 days |
+| Endpoint counts per API | Not measured yet — shown as `—` (would need per-endpoint discovery, not just a base-URL ping) |
 | Load Tests | Real — runs k6 against a target URL and streams live results (requests, req/s, avg, p95, p99, error rate). Capped at 50 virtual users / 60s. |
-| Dashboard metrics, Monitoring page, Recent Activity | Sample data from `frontend/src/mock/`, labelled "Sample data" |
-| Reports | Load-test reports are real, built from every completed run (stored in the browser). Performance, Uptime and Historical Analytics reports are labelled "Planned" — they need the health-check worker below. |
+| Dashboard metrics, Monitoring page, Recent Activity | Sample data from `frontend/src/mock/`, labelled "Sample data" — the APIs page and Reports use the real health-check data instead |
+| Reports | Load-test reports and per-API performance/uptime are real. Historical Analytics (long-term trends) is labelled "Planned". |
 
-Next up: a health-check worker that measures registered APIs and replaces the sample data. Authentication, alerts and reports come after that.
+Next up: point the Dashboard and Monitoring pages at the real health-check data instead of sample data, then authentication and alerts.

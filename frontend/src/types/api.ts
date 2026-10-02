@@ -14,6 +14,10 @@ export interface Project {
   timeout: number;
   createdAt: string;
   updatedAt: string;
+  uptimePercent: number | null;
+  avgLatencyMs: number | null;
+  lastCheckedAt: string | null;
+  latencyTrend: number[];
 }
 
 export interface MonitoredApi {

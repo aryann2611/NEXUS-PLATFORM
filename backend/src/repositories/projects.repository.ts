@@ -1,6 +1,8 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { isDuplicateEntry, pool } from "../db/database.js";
-import type { Project, ProjectStatus } from "../types/project.js";
+import type { Project, ProjectMetrics, ProjectStatus } from "../types/project.js";
+
+export type ProjectRecord = Omit<Project, keyof ProjectMetrics>;
 
 interface ProjectRow extends RowDataPacket {
   id: number;
@@ -26,7 +28,7 @@ export interface NewProject {
 
 const columns = "id, name, base_url, description, tags, status, check_interval, timeout, created_at, updated_at";
 
-function toProject(row: ProjectRow): Project {
+function toProject(row: ProjectRow): ProjectRecord {
   return {
     id: String(row.id),
     name: row.name,
@@ -41,18 +43,28 @@ function toProject(row: ProjectRow): Project {
   };
 }
 
-export async function findAllProjects(): Promise<Project[]> {
+export async function updateProjectStatus(id: string, status: ProjectStatus): Promise<void> {
+  await pool.query("UPDATE projects SET status = ? WHERE id = ?", [status, id]);
+}
+
+export async function findAllProjects(): Promise<ProjectRecord[]> {
   const [rows] = await pool.query<ProjectRow[]>(`SELECT ${columns} FROM projects ORDER BY id DESC`);
   return rows.map(toProject);
 }
 
-export async function findProjectById(id: string): Promise<Project | null> {
+export async function findProjectById(id: string): Promise<ProjectRecord | null> {
   const [rows] = await pool.query<ProjectRow[]>(`SELECT ${columns} FROM projects WHERE id = ?`, [id]);
   return rows[0] ? toProject(rows[0]) : null;
 }
 
+export async function findProjectsByIds(ids: string[]): Promise<ProjectRecord[]> {
+  if (ids.length === 0) return [];
+  const [rows] = await pool.query<ProjectRow[]>(`SELECT ${columns} FROM projects WHERE id IN (?)`, [ids]);
+  return rows.map(toProject);
+}
+
 /** Returns the stored project, or null when the name is already taken. */
-export async function insertProject(project: NewProject): Promise<Project | null> {
+export async function insertProject(project: NewProject): Promise<ProjectRecord | null> {
   try {
     const [result] = await pool.query<ResultSetHeader>(
       "INSERT INTO projects (name, base_url, description, tags, check_interval, timeout) VALUES (?, ?, ?, ?, ?, ?)",

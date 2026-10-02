@@ -1,6 +1,13 @@
 export type ProjectStatus = "pending" | "healthy" | "degraded" | "down";
 
-export interface Project {
+export interface ProjectMetrics {
+  uptimePercent: number | null;
+  avgLatencyMs: number | null;
+  lastCheckedAt: string | null;
+  latencyTrend: number[];
+}
+
+export interface Project extends ProjectMetrics {
   id: string;
   name: string;
   baseUrl: string;
