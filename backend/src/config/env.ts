@@ -9,5 +9,6 @@ export const env = {
     name: process.env.DB_NAME || "nexus",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD ?? "",
+    ssl: process.env.DB_SSL === "true",
   },
 };

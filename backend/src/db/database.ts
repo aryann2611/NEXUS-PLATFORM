@@ -9,6 +9,7 @@ export const pool = mysql.createPool({
   database: env.db.name,
   timezone: "Z",
   connectTimeout: 5_000,
+  ssl: env.db.ssl ? { rejectUnauthorized: true } : undefined,
 });
 
 // TIMESTAMP values are returned in the session time zone; pin it to UTC to match `timezone: "Z"`.

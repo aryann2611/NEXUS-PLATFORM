@@ -53,6 +53,29 @@ Run them individually with `npm run dev:frontend` / `npm run dev:backend`.
 | `npm run db:seed` | Registers real, key-free public APIs; safe to run repeatedly |
 | `npm test` | Backend API tests against the `nexus_test` database (created automatically) |
 
+## Deploying
+
+Backend and frontend deploy as two separate services, plus a MySQL database.
+
+**Backend** — build and run the compiled output:
+
+```bash
+npm --prefix backend run build
+npm --prefix backend start   # runs backend/dist/server.js
+```
+
+Set these env vars on the host: `PORT`, `FRONTEND_URL` (the deployed frontend's origin, for CORS), `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, and `DB_SSL=true` if your MySQL provider requires TLS (most managed ones do — e.g. PlanetScale, Aiven, AWS RDS). Run `npm --prefix backend run db:migrate` once against the production database before first boot.
+
+**Frontend** — static build, served by any static host:
+
+```bash
+npm --prefix frontend run build   # outputs frontend/dist
+```
+
+Set `VITE_API_URL` to the deployed backend's URL at build time (it's baked into the bundle, so rebuild if it changes).
+
+k6 must be installed on the backend host for the Load Tests page to work; without it, `/api/load-tests` returns `503`.
+
 ## API
 
 All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "message": "…" } }`.
