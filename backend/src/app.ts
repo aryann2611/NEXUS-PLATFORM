@@ -5,6 +5,7 @@ import { isDatabaseUnavailable, pool } from "./db/database.js";
 import { activityRoutes } from "./routes/activity.routes.js";
 import { healthRoutes } from "./routes/health.routes.js";
 import { startMonitoring } from "./monitoring/worker.js";
+import { loadTestsRoutes } from "./routes/loadTests.routes.js";
 import { projectsRoutes } from "./routes/projects.routes.js";
 import { reportsRoutes } from "./routes/reports.routes.js";
 import { isHttpUrl } from "./schemas/projects.schema.js";
@@ -52,6 +53,7 @@ export async function buildApp({ logger = true, monitoring = false } = {}) {
   await app.register(projectsRoutes);
   await app.register(reportsRoutes);
   await app.register(activityRoutes);
+  await app.register(loadTestsRoutes);
 
   return app;
 }

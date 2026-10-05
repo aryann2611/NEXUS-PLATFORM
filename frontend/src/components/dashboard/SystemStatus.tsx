@@ -11,8 +11,6 @@ const headline: Record<BackendStatus, string> = {
   disconnected: "Backend Unreachable",
 };
 
-const plannedServices = ["Load Test Runner"];
-
 // The engine finishes a pass every few seconds; a minute without one means it's stuck.
 const STALLED_AFTER_MS = 60_000;
 
@@ -64,12 +62,12 @@ export default function SystemStatus({ health }: { health: HealthState }) {
             {engine.detail && <p className="mt-1 font-mono text-xs text-neutral-500">{engine.detail}</p>}
           </div>
         </li>
-        {plannedServices.map((service) => (
-          <li key={service} className="flex items-center justify-between gap-4 px-5 py-3">
-            <p className="text-sm text-neutral-500">{service}</p>
-            <Badge>Planned</Badge>
-          </li>
-        ))}
+        <li className="flex items-center justify-between gap-4 px-5 py-3">
+          <p className="text-sm text-neutral-200">Load Test Runner</p>
+          <Badge tone="healthy" dot>
+            Live
+          </Badge>
+        </li>
         <li className="flex items-center justify-between gap-4 px-5 py-3">
           <div>
             <p className={`text-sm ${alerting ? "text-neutral-200" : "text-neutral-500"}`}>Alerting</p>
