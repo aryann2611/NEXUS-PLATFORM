@@ -6,6 +6,9 @@ export interface HealthResponse {
     running: boolean;
     lastRunAt: string | null;
   };
+  alerting: {
+    webhookConfigured: boolean;
+  };
 }
 
 export type BackendStatus = "checking" | "connected" | "disconnected";

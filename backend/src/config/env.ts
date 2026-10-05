@@ -9,6 +9,11 @@ export const env = {
     name: process.env.DB_NAME || "nexus",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD ?? "",
+    ssl: process.env.DB_SSL === "true",
+  },
+  alerts: {
+    // Optional: POSTed a JSON alert when an API goes down or recovers. Unset means no alerts.
+    webhookUrl: process.env.ALERT_WEBHOOK_URL || "",
   },
   monitoring: {
     enabled: process.env.MONITORING_ENABLED !== "false",

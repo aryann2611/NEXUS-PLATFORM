@@ -11,8 +11,6 @@ const headline: Record<BackendStatus, string> = {
   disconnected: "Backend Unreachable",
 };
 
-const plannedServices = ["Load Test Runner", "Alerting"];
-
 // The engine finishes a pass every few seconds; a minute without one means it's stuck.
 const STALLED_AFTER_MS = 60_000;
 
@@ -28,6 +26,7 @@ function engineStatus(health: HealthState): { tone: Tone; label: string; detail?
 export default function SystemStatus({ health }: { health: HealthState }) {
   const tone = backendTone[health.status];
   const engine = engineStatus(health);
+  const alerting = health.data?.alerting.webhookConfigured ?? false;
 
   return (
     <Card title="System Status" description="NEXUS platform services">
@@ -63,12 +62,21 @@ export default function SystemStatus({ health }: { health: HealthState }) {
             {engine.detail && <p className="mt-1 font-mono text-xs text-neutral-500">{engine.detail}</p>}
           </div>
         </li>
-        {plannedServices.map((service) => (
-          <li key={service} className="flex items-center justify-between gap-4 px-5 py-3">
-            <p className="text-sm text-neutral-500">{service}</p>
-            <Badge>Planned</Badge>
-          </li>
-        ))}
+        <li className="flex items-center justify-between gap-4 px-5 py-3">
+          <p className="text-sm text-neutral-200">Load Test Runner</p>
+          <Badge tone="healthy" dot>
+            Live
+          </Badge>
+        </li>
+        <li className="flex items-center justify-between gap-4 px-5 py-3">
+          <div>
+            <p className={`text-sm ${alerting ? "text-neutral-200" : "text-neutral-500"}`}>Alerting</p>
+            <p className="text-xs text-neutral-500">{alerting ? "Webhook on down and recovery" : "Set ALERT_WEBHOOK_URL to enable"}</p>
+          </div>
+          <Badge tone={alerting ? "healthy" : "neutral"} dot={alerting}>
+            {alerting ? "On" : "Off"}
+          </Badge>
+        </li>
       </ul>
     </Card>
   );

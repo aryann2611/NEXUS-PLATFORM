@@ -18,11 +18,13 @@ MySQL
 
 **Backend:** Node.js, Fastify (JSON Schema validation), TypeScript, MySQL (`mysql2`), @fastify/cors, dotenv
 
+**Load testing:** [k6](https://k6.io) (optional — only the Load Tests page needs it)
+
 **Tests:** Node's built-in test runner (`node:test`) via `tsx`, running against a real MySQL database
 
 ## Local Setup
 
-Requires Node.js 22+ and a running MySQL 8 server.
+Requires Node.js 22+ and a running MySQL 8 server. The Load Tests page also needs [k6](https://k6.io/docs/get-started/installation/) on your PATH.
 
 ```bash
 git clone <repo-url>
@@ -52,6 +54,29 @@ Run them individually with `npm run dev:frontend` / `npm run dev:backend`.
 | `npm test` | Backend API tests against the `nexus_test` database (created automatically) |
 | `npm run lint` / `npm run typecheck` | Frontend lint; type-check backend and frontend (CI runs these on every pull request) |
 
+## Deploying
+
+Backend and frontend deploy as two separate services, plus a MySQL database.
+
+**Backend** — build and run the compiled output:
+
+```bash
+npm --prefix backend run build
+npm --prefix backend start   # runs backend/dist/server.js
+```
+
+Set these env vars on the host: `PORT`, `FRONTEND_URL` (the deployed frontend's origin, for CORS), `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, and `DB_SSL=true` if your MySQL provider requires TLS (most managed ones do — e.g. PlanetScale, Aiven, AWS RDS). Run `npm --prefix backend run db:migrate` once against the production database before first boot.
+
+**Frontend** — static build, served by any static host:
+
+```bash
+npm --prefix frontend run build   # outputs frontend/dist
+```
+
+Set `VITE_API_URL` to the deployed backend's URL at build time (it's baked into the bundle, so rebuild if it changes).
+
+k6 must be installed on the backend host for the Load Tests page to work; without it, `/api/load-tests` returns `503`.
+
 ## API
 
 All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "message": "…" } }`.
@@ -64,6 +89,7 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 | `POST` | `/api/projects` | Register an API → `201` |
 | `GET` | `/api/reports?range=24h\|7d\|30d&projectId=` | Uptime, latency percentiles, incidents and time buckets (default `7d`, all APIs) |
 | `GET` | `/api/activity?limit=20&changes=true&projectId=` | Recent checks, newest first, labelled `Health check` / `Went down` / `Slow response` / `Recovered`; `changes=true` keeps only status changes (last 7 days, `limit` up to 200) |
+| `POST` | `/api/load-tests` | Run a k6 load test; streams live NDJSON metric snapshots |
 
 `POST /api/projects` body:
 
@@ -94,6 +120,25 @@ Uptime is the share of checks that weren't `down`. An incident is a run of conse
 
 Because the engine fetches user-supplied URLs, it refuses loopback, private, link-local (cloud metadata) and other internal addresses, checked on the address actually connected to. Set `MONITOR_ALLOW_PRIVATE_TARGETS=true` to monitor APIs running on your own machine or network. Set `MONITORING_ENABLED=false` to run the API without the engine.
 
+### Alerts
+
+Set `ALERT_WEBHOOK_URL` to be told when an API goes down or comes back. The engine POSTs JSON on each edge: the first check that fails, or any change from `healthy`/`degraded` to `down`, sends `"event": "down"`; the first check that answers again sends `"event": "recovered"`. `healthy` ⇄ `degraded` flips don't alert. The body carries a ready-to-display `text` line (Slack and Mattermost incoming webhooks show it as-is) plus `project`, `outcome`, `statusCode`, `latencyMs`, `error` and `checkedAt`:
+
+```json
+{
+  "text": "🔴 Orders API is down (timed out after 10s)",
+  "event": "down",
+  "project": { "id": "7", "name": "Orders API", "baseUrl": "https://orders.example.com" },
+  "outcome": "down",
+  "statusCode": null,
+  "latencyMs": null,
+  "error": "timed out after 10s",
+  "checkedAt": "2026-06-10T12:00:00.000Z"
+}
+```
+
+A webhook that is slow (5s timeout) or returns an error is logged and skipped; the check is still recorded. `GET /api/health` reports `alerting.webhookConfigured` (never the URL), which the Dashboard's System Status shows as On/Off.
+
 The Dashboard, Monitoring page and API cards show these results live. The Reports page shows the results for the last 24 hours, 7 days or 30 days, for all APIs or one: summary figures, response-time and availability trends, per-API latency percentiles, per-API uptime history and an incident log, with CSV and JSON export.
 
 ## Current Status
@@ -104,6 +149,6 @@ The Dashboard, Monitoring page and API cards show these results live. The Report
 | Backend connection status (sidebar, dashboard, settings) | Real — checked on load and every 30s |
 | Health checks, uptime, latency, incidents, activity | Real — measured by the monitoring engine; shown on the Dashboard, APIs, Monitoring and Reports pages |
 | Endpoint counts per API | Not measured yet — shown as `—` |
-| Load Tests | UI foundation only (k6 runner in progress in a separate pull request) |
+| Load Tests | Real — runs k6 against a target URL and streams live results (requests, req/s, avg, p95, p99, error rate). Capped at 50 virtual users / 60s. |
 
-Next up: load testing (k6), alerts and authentication.
+Next up: authentication.
