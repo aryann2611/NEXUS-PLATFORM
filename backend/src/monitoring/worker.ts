@@ -2,6 +2,7 @@ import { env } from "../config/env.js";
 import { deleteChecksBefore, recordCheck } from "../repositories/checks.repository.js";
 import { findDueProjects } from "../repositories/projects.repository.js";
 import type { Project } from "../types/project.js";
+import { notifyStatusChange } from "./alerts.js";
 import { checkUrl } from "./checker.js";
 
 const TICK_MS = 5_000;
@@ -27,6 +28,8 @@ export async function checkProject(project: Project): Promise<void> {
     allowPrivateTargets: env.monitoring.allowPrivateTargets,
   });
   await recordCheck({ projectId: project.id, checkedAt, ...result });
+  // project.status is still the pre-check status here, which is what the transition is measured from.
+  await notifyStatusChange(project, result, checkedAt);
 }
 
 /** Checks every project that is due, a batch at a time. Returns how many were checked. */

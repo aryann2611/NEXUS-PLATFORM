@@ -10,6 +10,10 @@ export const env = {
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD ?? "",
   },
+  alerts: {
+    // Optional: POSTed a JSON alert when an API goes down or recovers. Unset means no alerts.
+    webhookUrl: process.env.ALERT_WEBHOOK_URL || "",
+  },
   monitoring: {
     enabled: process.env.MONITORING_ENABLED !== "false",
     // Off by default: the checker fetches user-supplied URLs, so private and internal addresses are refused.
