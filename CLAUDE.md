@@ -47,6 +47,8 @@ Activity (`services/activity.service.ts`): recent checks with the previous outco
 
 Reports (`services/reports.service.ts`): `GET /api/reports` loads the range's checks ordered by project and time and aggregates in JS (percentiles are nearest-rank; incidents are runs of non-healthy checks). Bucket width depends on range (24h → 1h, 7d → 6h, 30d → 1d) and buckets are aligned to UTC. Aggregating in JS keeps it portable across MySQL/MariaDB but loads every check in the range; move to SQL rollups if check volume grows large.
 
+Load tests (`services/loadTest.service.ts`, `routes/loadTests.routes.ts`): `POST /api/load-tests` spawns the `k6` binary (must be on PATH, otherwise 503) against the target URL and streams newline-delimited JSON snapshots (`application/x-ndjson`) built from k6's `--out json` file. Request caps (50 VUs, 5-60s) live in `schemas/loadTests.schema.ts` and are enforced before k6 starts, which is why `loadTests.routes.test.ts` needs neither k6 nor a database. Unlike the monitoring checker, the target is not passed through `network-guard`, so localhost targets work; keep the caps if that ever changes.
+
 Database: migrations are plain `.sql` files in `db/migrations/`, applied in filename order by `db/migrator.ts` and tracked in `schema_migrations`. Add a new numbered file; never edit an applied one. The pool pins sessions to UTC. BIGINT ids are exposed to clients as strings. Duplicate project names (unique key, case-insensitive collation) surface as 409 via `isDuplicateEntry` → `null` from the repository.
 
 CORS only allows `FRONTEND_URL` (default `http://localhost:5173`), so open the frontend on `localhost`, not `127.0.0.1`.
@@ -60,11 +62,11 @@ React 19 + React Router 7 + Tailwind CSS v4 (configured in `index.css` via `@the
 - `AppLayout` calls `useHealth()` once (polls every 30s) and passes it to pages through the router outlet context (`useOutletContext<LayoutContext>()`).
 - Pages are lazy-loaded in `App.tsx`; `AppLayout` wraps the `<Outlet>` in `Suspense`.
 - The header search navigates to `/apis?q=…`; the APIs page reads its filter from the URL query.
-- **All data is real.** Dashboard, Monitoring and Reports read `GET /api/reports` (`useReport`); activity feeds read `GET /api/activity` (`useActivity`); API cards merge a 24h report into the registry (`useApis`). There is no mock data; Load Tests is the only UI shell (the k6 runner is on `feature/k6-load-tests`).
+- **All data is real.** Dashboard, Monitoring and Reports read `GET /api/reports` (`useReport`); activity feeds read `GET /api/activity` (`useActivity`); API cards merge a 24h report into the registry (`useApis`). There is no mock data. Load Tests streams from `POST /api/load-tests` (see below); finished runs are kept in `localStorage` by `lib/loadTestHistory.ts`, not the database.
 - `/api/health` also reports the monitoring engine (`running`, `lastRunAt`), which System Status shows as Running / Stalled / Off.
 - `pages/Reports.tsx` keeps its state (`range`, `api`, `tab`) in the URL query, so API cards link to `/reports?api=<id>`. Frontend report types in `types/report.ts` mirror `backend/src/types/report.ts`; change both together.
 - Status colours/labels are centralised in `lib/status.ts` (tone maps); use them rather than hardcoding Tailwind colour classes.
 
 ## Roadmap context
 
-Next planned work is k6 load testing (in progress on `feature/k6-load-tests`), then alerts and auth.
+Next planned work is alerts, then auth.
