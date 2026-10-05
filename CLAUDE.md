@@ -71,4 +71,4 @@ React 19 + React Router 7 + Tailwind CSS v4 (configured in `index.css` via `@the
 
 ## Roadmap context
 
-Next planned work is alerts, then auth.
+Next planned work is auth.

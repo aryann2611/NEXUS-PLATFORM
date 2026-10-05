@@ -151,4 +151,4 @@ The Dashboard, Monitoring page and API cards show these results live. The Report
 | Endpoint counts per API | Not measured yet — shown as `—` |
 | Load Tests | Real — runs k6 against a target URL and streams live results (requests, req/s, avg, p95, p99, error rate). Capped at 50 virtual users / 60s. |
 
-Next up: alerts and authentication.
+Next up: authentication.
