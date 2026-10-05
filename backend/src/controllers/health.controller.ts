@@ -1,3 +1,4 @@
+import { env } from "../config/env.js";
 import { pool } from "../db/database.js";
 import { monitoringState } from "../monitoring/worker.js";
 import type { HealthStatus } from "../types/health.js";
@@ -13,5 +14,6 @@ export async function getHealthStatus(): Promise<HealthStatus> {
       running: monitoringState.running,
       lastRunAt: monitoringState.lastRunAt?.toISOString() ?? null,
     },
+    alerting: { webhookConfigured: env.alerts.webhookUrl !== "" },
   };
 }

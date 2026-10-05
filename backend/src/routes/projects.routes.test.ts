@@ -34,6 +34,13 @@ test("GET /api/health reports ok while the database answers", async () => {
   assert.equal(res.json<{ status: string }>().status, "ok");
 });
 
+test("GET /api/health says whether alerting is configured without leaking the webhook URL", async () => {
+  const res = await app.inject({ method: "GET", url: "/api/health" });
+  const { alerting } = res.json<{ alerting: { webhookConfigured: boolean } }>();
+  assert.deepEqual(alerting, { webhookConfigured: (process.env.ALERT_WEBHOOK_URL ?? "") !== "" });
+  assert.ok(!res.body.includes("http"), "the response contains no URLs");
+});
+
 test("POST /api/projects stores a pending project", async () => {
   const res = await createProject(validBody);
   assert.equal(res.statusCode, 201);
