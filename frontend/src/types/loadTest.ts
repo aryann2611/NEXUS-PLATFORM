@@ -15,3 +15,8 @@ export interface LoadTestSnapshot {
   p99Ms: number;
   errorRatePercent: number;
 }
+
+export interface LoadTestRun extends LoadTestInput, Omit<LoadTestSnapshot, "status" | "elapsedMs"> {
+  id: string;
+  completedAt: string;
+}

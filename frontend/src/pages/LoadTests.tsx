@@ -6,6 +6,7 @@ import Card from "../components/common/Card";
 import EmptyState from "../components/common/EmptyState";
 import { Field, Input, Select } from "../components/common/Form";
 import PageHeader from "../components/common/PageHeader";
+import LoadTestRunsTable from "../components/reports/LoadTestRunsTable";
 import { useLoadTest } from "../hooks/useLoadTest";
 import { compactNumber } from "../lib/format";
 import { API_URL } from "../services/api";
@@ -24,7 +25,7 @@ function metricsFrom(snapshot: LoadTestSnapshot | null): { label: string; value:
 }
 
 export default function LoadTests() {
-  const { state, snapshot, error, start, cancel } = useLoadTest();
+  const { state, snapshot, error, history, start, cancel } = useLoadTest();
   const [url, setUrl] = useState(`${API_URL}/api/health`);
   const running = state === "running";
 
@@ -102,6 +103,12 @@ export default function LoadTests() {
           {!snapshot && <EmptyState icon={Zap} title="No test runs yet" description="Configure a target and start a test to see live results here." />}
         </Card>
       </div>
+
+      {history.length > 0 && (
+        <Card title="Recent Runs" description="Your last load tests, newest first.">
+          <LoadTestRunsTable runs={history} />
+        </Card>
+      )}
     </div>
   );
 }

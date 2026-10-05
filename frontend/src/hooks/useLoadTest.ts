@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
+import { getLoadTestHistory, saveLoadTestRun } from "../lib/loadTestHistory";
 import { streamLoadTest } from "../services/loadTest";
-import type { LoadTestInput, LoadTestSnapshot } from "../types/loadTest";
+import type { LoadTestInput, LoadTestRun, LoadTestSnapshot } from "../types/loadTest";
 
 export type LoadTestState = "idle" | "running" | "done" | "error";
 
@@ -8,6 +9,7 @@ export function useLoadTest() {
   const [state, setState] = useState<LoadTestState>("idle");
   const [snapshot, setSnapshot] = useState<LoadTestSnapshot | null>(null);
   const [error, setError] = useState("");
+  const [history, setHistory] = useState<LoadTestRun[]>(() => getLoadTestHistory());
   const controller = useRef<AbortController | null>(null);
 
   async function start(input: LoadTestInput) {
@@ -17,11 +19,16 @@ export function useLoadTest() {
     setState("running");
     setSnapshot(null);
     setError("");
+    let last: LoadTestSnapshot | null = null;
     try {
       for await (const snap of streamLoadTest(input, ac.signal)) {
+        last = snap;
         setSnapshot(snap);
       }
-      if (!ac.signal.aborted) setState("done");
+      if (!ac.signal.aborted) {
+        setState("done");
+        if (last) setHistory(saveLoadTestRun(input, last));
+      }
     } catch (e) {
       if (ac.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Load test failed.");
@@ -34,5 +41,5 @@ export function useLoadTest() {
     setState((s) => (s === "running" ? "idle" : s));
   }
 
-  return { state, snapshot, error, start, cancel };
+  return { state, snapshot, error, history, start, cancel };
 }
