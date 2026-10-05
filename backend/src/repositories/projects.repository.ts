@@ -11,6 +11,7 @@ interface ProjectRow extends RowDataPacket {
   status: ProjectStatus;
   check_interval: number;
   timeout: number;
+  last_checked_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -24,7 +25,7 @@ export interface NewProject {
   timeout: number;
 }
 
-const columns = "id, name, base_url, description, tags, status, check_interval, timeout, created_at, updated_at";
+const columns = "id, name, base_url, description, tags, status, check_interval, timeout, last_checked_at, created_at, updated_at";
 
 function toProject(row: ProjectRow): Project {
   return {
@@ -36,6 +37,7 @@ function toProject(row: ProjectRow): Project {
     status: row.status,
     checkInterval: row.check_interval,
     timeout: row.timeout,
+    lastCheckedAt: row.last_checked_at?.toISOString() ?? null,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
   };
@@ -49,6 +51,18 @@ export async function findAllProjects(): Promise<Project[]> {
 export async function findProjectById(id: string): Promise<Project | null> {
   const [rows] = await pool.query<ProjectRow[]>(`SELECT ${columns} FROM projects WHERE id = ?`, [id]);
   return rows[0] ? toProject(rows[0]) : null;
+}
+
+/** Projects never checked, or whose last check is older than their check interval. */
+export async function findDueProjects(limit: number): Promise<Project[]> {
+  const [rows] = await pool.query<ProjectRow[]>(
+    `SELECT ${columns} FROM projects
+     WHERE last_checked_at IS NULL OR last_checked_at <= UTC_TIMESTAMP(3) - INTERVAL check_interval SECOND
+     ORDER BY last_checked_at IS NOT NULL, last_checked_at
+     LIMIT ?`,
+    [limit],
+  );
+  return rows.map(toProject);
 }
 
 /** Returns the stored project, or null when the name is already taken. */

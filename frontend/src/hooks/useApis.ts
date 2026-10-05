@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
-import { createProject, getProjects } from "../services/api";
+import { createProject, getProjects, getReport } from "../services/api";
 import type { MonitoredApi, NewApiInput, Project } from "../types/api";
+import type { ApiReport } from "../types/report";
 
 export type LoadState = "loading" | "ready" | "error";
 
-// The registry comes from MySQL; metrics stay empty until the monitoring engine measures them.
-function toMonitoredApi(project: Project): MonitoredApi {
+// The registry comes from MySQL; uptime and latency come from the last 24h of monitoring checks.
+function toMonitoredApi(project: Project, metrics?: ApiReport): MonitoredApi {
   return {
     id: project.id,
     name: project.name,
     baseUrl: project.baseUrl,
     health: project.status,
     endpointCount: null,
-    uptimePercent: null,
-    avgLatencyMs: null,
-    lastCheckedAt: null,
+    uptimePercent: metrics?.uptimePercent ?? null,
+    avgLatencyMs: metrics?.latency.avg ?? null,
+    lastCheckedAt: project.lastCheckedAt,
     latencyTrend: [],
   };
 }
 
-export function useApis() {
+/** `withMetrics: false` skips the 24h report when only the registry is needed (e.g. a picker). */
+export function useApis({ withMetrics = true } = {}) {
   const [apis, setApis] = useState<MonitoredApi[]>([]);
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState("");
@@ -27,10 +29,12 @@ export function useApis() {
 
   useEffect(() => {
     let active = true;
-    getProjects()
-      .then((projects) => {
+    // Metrics are a bonus: if the report fails, the registry still loads.
+    Promise.all([getProjects(), withMetrics ? getReport("24h").catch(() => null) : null])
+      .then(([projects, report]) => {
         if (!active) return;
-        setApis(projects.map(toMonitoredApi));
+        const metrics = new Map(report?.apis.map((api) => [api.id, api]));
+        setApis(projects.map((project) => toMonitoredApi(project, metrics.get(project.id))));
         setState("ready");
       })
       .catch((e: unknown) => {
@@ -41,7 +45,7 @@ export function useApis() {
     return () => {
       active = false;
     };
-  }, [attempt]);
+  }, [attempt, withMetrics]);
 
   function reload() {
     setState("loading");

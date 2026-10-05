@@ -5,19 +5,19 @@ import ActivityTable from "../components/apis/ActivityTable";
 import AddApiDrawer from "../components/apis/AddApiDrawer";
 import ApiCard from "../components/apis/ApiCard";
 import ApiFilters from "../components/apis/ApiFilters";
-import { Badge } from "../components/common/Badge";
 import { Button, ButtonLink } from "../components/common/Button";
 import Card from "../components/common/Card";
 import EmptyState from "../components/common/EmptyState";
 import PageHeader from "../components/common/PageHeader";
 import StatCard from "../components/common/StatCard";
+import { useActivity } from "../hooks/useActivity";
 import { useApis } from "../hooks/useApis";
 import { countByHealth, filterApis, type ApiSort, type HealthFilter } from "../lib/apis";
 import { percentOf } from "../lib/format";
-import { activityLog } from "../mock/apis";
 
 export default function Apis() {
   const { apis, state, error, reload, addApi } = useApis();
+  const activity = useActivity(5);
   const [params, setParams] = useSearchParams();
   const [status, setStatus] = useState<HealthFilter>("all");
   const [sort, setSort] = useState<ApiSort>("lastChecked");
@@ -92,14 +92,13 @@ export default function Apis() {
         description="Latest checks and status changes across your APIs."
         actions={
           <div className="flex items-center gap-3">
-            <Badge>Sample data</Badge>
             <ButtonLink to="/monitoring" size="sm">
               View All Activity <ArrowRight size={14} />
             </ButtonLink>
           </div>
         }
       >
-        <ActivityTable events={activityLog.slice(0, 4)} />
+        <ActivityTable items={activity.items} state={activity.state} error={activity.error} />
       </Card>
 
       <AddApiDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onSubmit={addApi} />

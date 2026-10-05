@@ -10,4 +10,11 @@ export const env = {
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD ?? "",
   },
+  monitoring: {
+    enabled: process.env.MONITORING_ENABLED !== "false",
+    // Off by default: the checker fetches user-supplied URLs, so private and internal addresses are refused.
+    allowPrivateTargets: process.env.MONITOR_ALLOW_PRIVATE_TARGETS === "true",
+    degradedAfterMs: Number(process.env.MONITOR_DEGRADED_AFTER_MS) || 1000,
+    retentionDays: Number(process.env.MONITOR_RETENTION_DAYS) || 90,
+  },
 };
