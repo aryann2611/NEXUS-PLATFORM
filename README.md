@@ -94,6 +94,25 @@ Uptime is the share of checks that weren't `down`. An incident is a run of conse
 
 Because the engine fetches user-supplied URLs, it refuses loopback, private, link-local (cloud metadata) and other internal addresses, checked on the address actually connected to. Set `MONITOR_ALLOW_PRIVATE_TARGETS=true` to monitor APIs running on your own machine or network. Set `MONITORING_ENABLED=false` to run the API without the engine.
 
+### Alerts
+
+Set `ALERT_WEBHOOK_URL` to be told when an API goes down or comes back. The engine POSTs JSON on each edge: the first check that fails, or any change from `healthy`/`degraded` to `down`, sends `"event": "down"`; the first check that answers again sends `"event": "recovered"`. `healthy` ⇄ `degraded` flips don't alert. The body carries a ready-to-display `text` line (Slack and Mattermost incoming webhooks show it as-is) plus `project`, `outcome`, `statusCode`, `latencyMs`, `error` and `checkedAt`:
+
+```json
+{
+  "text": "🔴 Orders API is down (timed out after 10s)",
+  "event": "down",
+  "project": { "id": "7", "name": "Orders API", "baseUrl": "https://orders.example.com" },
+  "outcome": "down",
+  "statusCode": null,
+  "latencyMs": null,
+  "error": "timed out after 10s",
+  "checkedAt": "2026-06-10T12:00:00.000Z"
+}
+```
+
+A webhook that is slow (5s timeout) or returns an error is logged and skipped; the check is still recorded. `GET /api/health` reports `alerting.webhookConfigured` (never the URL), which the Dashboard's System Status shows as On/Off.
+
 The Dashboard, Monitoring page and API cards show these results live. The Reports page shows the results for the last 24 hours, 7 days or 30 days, for all APIs or one: summary figures, response-time and availability trends, per-API latency percentiles, per-API uptime history and an incident log, with CSV and JSON export.
 
 ## Current Status
