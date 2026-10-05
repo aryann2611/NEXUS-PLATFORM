@@ -86,6 +86,7 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 | `GET` | `/api/projects` | All registered APIs, newest first |
 | `GET` | `/api/projects/:id` | One API, or `404` |
 | `POST` | `/api/projects` | Register an API → `201` |
+| `GET` | `/api/metrics/overview` | Dashboard/Monitoring data from stored health checks: 30-day uptime, 24h checks/latency/error rate, hourly p50/p95 series, 45-day daily uptime per API, recent activity |
 | `POST` | `/api/load-tests` | Run a k6 load test; streams live NDJSON metric snapshots |
 
 `POST /api/projects` body:
@@ -112,7 +113,7 @@ All responses are JSON. Success: `{ "data": … }`. Errors: `{ "error": { "messa
 | Uptime, avg latency per API | Real — a scheduler pings each registered API's base URL every `checkInterval` seconds and stores the result; uptime is computed over the last 30 days |
 | Endpoint counts per API | Not measured yet — shown as `—` (would need per-endpoint discovery, not just a base-URL ping) |
 | Load Tests | Real — runs k6 against a target URL and streams live results (requests, req/s, avg, p95, p99, error rate). Capped at 50 virtual users / 60s. |
-| Dashboard metrics, Monitoring page, Recent Activity | Sample data from `frontend/src/mock/`, labelled "Sample data" — the APIs page and Reports use the real health-check data instead |
+| Dashboard, Monitoring page, Recent Activity | Real — computed from stored health checks via `/api/metrics/overview` and refreshed every 30s. Empty until the first checks run |
 | Reports | Load-test reports and per-API performance/uptime are real. Historical Analytics (long-term trends) is labelled "Planned". |
 
-Next up: point the Dashboard and Monitoring pages at the real health-check data instead of sample data, then authentication and alerts.
+Next up: authentication and alerts.

@@ -1,5 +1,6 @@
 import type { NewApiInput, Project } from "../types/api";
 import type { HealthResponse } from "../types/health";
+import type { Overview } from "../types/metrics";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -39,4 +40,8 @@ export async function createProject(input: NewApiInput): Promise<Project> {
     }),
   });
   return data;
+}
+
+export async function getOverview(): Promise<Overview> {
+  return (await request<{ data: Overview }>("/api/metrics/overview")).data;
 }

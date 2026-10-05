@@ -10,7 +10,7 @@ const headline: Record<BackendStatus, string> = {
   disconnected: "Backend Unreachable",
 };
 
-const plannedServices = ["Monitoring Engine", "Alerting"];
+const liveServices = ["Load Test Runner", "Monitoring Engine"];
 
 export default function SystemStatus({ health }: { health: HealthState }) {
   const tone = backendTone[health.status];
@@ -37,18 +37,18 @@ export default function SystemStatus({ health }: { health: HealthState }) {
             {health.latencyMs !== null && <p className="mt-1 font-mono text-xs text-neutral-500">{health.latencyMs}ms</p>}
           </div>
         </li>
-        <li className="flex items-center justify-between gap-4 px-5 py-3">
-          <p className="text-sm text-neutral-200">Load Test Runner</p>
-          <Badge tone="healthy" dot>
-            Live
-          </Badge>
-        </li>
-        {plannedServices.map((service) => (
+        {liveServices.map((service) => (
           <li key={service} className="flex items-center justify-between gap-4 px-5 py-3">
-            <p className="text-sm text-neutral-500">{service}</p>
-            <Badge>Planned</Badge>
+            <p className="text-sm text-neutral-200">{service}</p>
+            <Badge tone="healthy" dot>
+              Live
+            </Badge>
           </li>
         ))}
+        <li className="flex items-center justify-between gap-4 px-5 py-3">
+          <p className="text-sm text-neutral-500">Alerting</p>
+          <Badge>Planned</Badge>
+        </li>
       </ul>
     </Card>
   );

@@ -1,7 +1,7 @@
-import type { ActivityEvent, Health } from "./api";
+import type { ProjectStatus } from "./project.js";
 
 export interface LatencyPoint {
-  /** ISO start of the hour. */
+  /** ISO start of the hour (UTC); the client formats it in local time. */
   time: string;
   p50: number | null;
   p95: number | null;
@@ -10,10 +10,19 @@ export interface LatencyPoint {
 export interface UptimeHistoryRow {
   apiName: string;
   uptimePercent: number | null;
-  days: Health[];
+  /** Oldest day first; "pending" when the API had no checks that day. */
+  days: ProjectStatus[];
 }
 
-/** GET /api/metrics/overview — computed from stored health checks. */
+export interface ActivityEvent {
+  id: string;
+  at: string;
+  apiName: string;
+  event: string;
+  health: ProjectStatus;
+  details: string;
+}
+
 export interface Overview {
   summary: {
     uptimePercent: number | null;

@@ -2,7 +2,7 @@ import { insertCheck, findProjectIdsDueForCheck } from "../repositories/checks.r
 import { findProjectsByIds, updateProjectStatus, type ProjectRecord } from "../repositories/projects.repository.js";
 import type { ProjectStatus } from "../types/project.js";
 
-const DEGRADED_LATENCY_MS = 1_000;
+export const DEGRADED_LATENCY_MS = 1_000;
 const POLL_INTERVAL_MS = 15_000;
 const CHECK_CONCURRENCY = 5;
 

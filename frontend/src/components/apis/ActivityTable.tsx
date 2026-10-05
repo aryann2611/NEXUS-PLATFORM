@@ -1,11 +1,20 @@
+import { Activity } from "lucide-react";
 import { timeAgo } from "../../lib/format";
 import { healthTone, toneText } from "../../lib/status";
 import type { ActivityEvent } from "../../types/api";
 import { StatusDot } from "../common/Badge";
+import EmptyState from "../common/EmptyState";
 
 const th = "px-5 py-2.5 font-medium";
 
 export default function ActivityTable({ events }: { events: ActivityEvent[] }) {
+  if (events.length === 0) {
+    return (
+      <div className="border-t border-line">
+        <EmptyState icon={Activity} title="No checks yet" description="Results show up here once your APIs have been checked." />
+      </div>
+    );
+  }
   return (
     <div className="overflow-x-auto border-t border-line">
       <table className="w-full text-sm">

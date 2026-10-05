@@ -10,6 +10,7 @@ const colors = {
 };
 
 const tick = { fill: colors.tick, fontSize: 11 };
+const hourLabel = (iso: string) => new Date(iso).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit", hour12: false });
 
 interface ResponseTimeChartProps {
   data: LatencyPoint[];
@@ -28,12 +29,13 @@ export default function ResponseTimeChart({ data, thresholdMs }: ResponseTimeCha
             </linearGradient>
           </defs>
           <CartesianGrid stroke={colors.grid} vertical={false} />
-          <XAxis dataKey="time" tick={tick} tickLine={false} axisLine={false} interval={3} dy={6} />
+          <XAxis dataKey="time" tickFormatter={hourLabel} tick={tick} tickLine={false} axisLine={false} interval={3} dy={6} />
           <YAxis tick={tick} tickLine={false} axisLine={false} width={56} tickFormatter={(value) => `${value}ms`} />
           <Tooltip
             cursor={{ stroke: "#2a2a2a" }}
             contentStyle={{ background: "#0c0c0c", border: "1px solid #2a2a2a", borderRadius: 12, fontSize: 12, boxShadow: "0 12px 30px rgba(0,0,0,.5)" }}
             labelStyle={{ color: "#a3a3a3", marginBottom: 4 }}
+            labelFormatter={(label) => hourLabel(String(label))}
             itemStyle={{ padding: 0 }}
             formatter={(value) => `${value}ms`}
           />
